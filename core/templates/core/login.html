@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sign up/log in</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>
+            Sign in
+        </h1>
+        <h3>
+            Use your Email<br><br>
+        </h3>
+        <div class="data">
+            <form action="{% url 'core:login' %}" method="post">
+
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Email"><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="Password"><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox">
+                    <span class="chk-box">
+                        Remember me<br><br>
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" class="form-control log-btn" value="sign in"><br><br>
+                </div>
+
+                <div class="sign-up">
+                    <span>Don't have an account?</span>
+                    <input type="button" class="signup-btn" value="Sign Up" onclick="window.location.href='signup.html';">
+                </div>
+            </form>
+        </div>
+        
+</body>
+</html>
