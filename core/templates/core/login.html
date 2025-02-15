@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sign up/log in</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Log In</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
 </head>
 <body>
@@ -17,13 +18,13 @@
         </h3>
         <div class="data">
             <form action="{% url 'core:login' %}" method="post">
-
+                {% csrf_token %}
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Email"><br><br>
+                    <input type="text" class="form-control" placeholder="Username" name="username"><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="password" class="form-control" placeholder="Password"><br><br>
+                    <input type="password" class="form-control" placeholder="Password" name="password"><br><br>
                 </div>
 
                 <div class="form-group">
@@ -39,7 +40,18 @@
 
                 <div class="sign-up">
                     <span>Don't have an account?</span>
-                    <input type="button" class="signup-btn" value="Sign Up" onclick="window.location.href='signup.html';">
+                    <input type="button" class="signup-btn" value="Sign Up" onclick="window.location.href='../signup';">
+                </div>
+                
+                <div class="error">
+                    {% if form.errors %}
+                    <p>Invalid details: please try again</p>
+                    <p>Forgotten your password? <a href="{% url 'core:password_reset' %}">Reset password</a></p>
+                    {% endif %}
+                </div>
+
+                <div class="reset-password">
+
                 </div>
             </form>
         </div>
