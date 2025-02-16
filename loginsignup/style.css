@@ -1,0 +1,69 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+/*hole page*/
+html, .login-page {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+/*sign page background*/
+.login-page {
+    background-image: url("./pictures/turtle.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+/*hole sign page*/
+.login-page .container{
+    width: 400px;
+    height: 500px;
+    background-color: rgba(237, 237, 237, 0.825);
+
+    margin: 10% auto;
+    color: rgb(0, 60, 6);
+    border-radius: 15px;
+    padding: 60px;
+    transition: .5s;
+}
+/*every box in sign page*/
+.container .form-group .form-control{
+    border-radius: 5px;
+    background: transparent;
+    border-color: rgba(79, 79, 79, 0.062);
+    padding: 5px;
+    width: 100%;
+}
+/* signin & signup button(big) */
+.container .form-group .sign-btn{
+    border: 0;
+    font-size: 20px;
+    background-image: linear-gradient(100deg,rgb(104, 170, 178),rgb(121, 176, 98),rgb(178, 204, 134));
+}
+/*signup button(small) --- index.html*/
+.container .sign-up .signup-btn{
+    background: transparent;
+    border-color: rgba(247, 241, 241, 0.055);
+    text-decoration: underline;
+    font-size: 15px;
+}
+/*signin button(small) --- signup.html*/
+.container .sign-in .signin-btn{
+    background: transparent;
+    border-color: rgba(247, 241, 241, 0.055);
+    text-decoration: underline;
+    font-size: 15px;
+}
+/**/
+
+/*navigator page background*/
+.nav-page {
+    background: none;
+    background-image: linear-gradient(100deg,rgb(104, 170, 178),rgb(121, 176, 98),rgb(178, 204, 134));
+}

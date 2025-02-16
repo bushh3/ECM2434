@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <div class="container">
+        <h1>Sign up!</h1>
+        <h3>Create a new account<br><br></h3>
+        <div class="data">
+            <form action="#">
+                <!-- form-control class -->
+                <div class="form-group">
+                    <input type="email" class="form-control" placeholder="Email" required><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="First name" required><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Last name" required><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" oninput="this.value = this.value.replace(/\D/g, '')" placeholder="Student ID" required><br><br>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="Password" required><br><br>
+                </div>
+
+                <!-- sign-btn class -->
+                 <!-- sign up button（big） -->
+                <div class="form-group">
+                    <input type="submit" class="form-control sign-btn" value="Sign up"><br><br>
+                </div>
+                <!-- signin--btn class -->
+                 <!-- signin button(small) -->
+                <div class="sign-in">
+                    <span>already have an account?</span>
+                    <input type="button" class="signin-btn" value="Sign in" onclick="window.location.href='index.html';">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
