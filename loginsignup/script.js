@@ -1,92 +1,130 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
+    console.log('Form found:', form);
     
     if (form) {
-        // Base URL and API paths
-        const BASE_URL = 'http://127.0.0.1:8000';
-        const API_PATHS = {
-            login: `${BASE_URL}/api/login`,
-            signup: `${BASE_URL}/api/signup`,
-            users: `${BASE_URL}/api/users`
-        };
+        const submitButton = form.querySelector('.sign-btn');
+        const loadingText = form.querySelector('.loading-text');
+        const modal = document.querySelector('.success-modal');
+        const otherLoadingTexts = document.querySelectorAll('.loading-text:not(.loading)');
+        otherLoadingTexts.forEach(text => text.remove());
         
-        // Determine if it's login or signup form
-        const isLoginForm = form.querySelector('input[value="sign in"]');
-        const apiUrl = isLoginForm ? API_PATHS.login : API_PATHS.signup;
-
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            // Show loading animation
-            const loading = form.querySelector('.loading');
-            if (loading) loading.style.display = 'block';
-            
-            // Collect form data
-            const formData = new FormData(form);
-            const data = {};
-            formData.forEach((value, key) => {
-                if (value && key !== 'remember') {
-                    data[key] = value;
-                }
-            });
+            console.log('Form submitted');
+ 
+// //TEST
+//             try {
+//                 // 只显示按钮的loading
+//                 if (submitButton) submitButton.style.display = 'none';
+//                 if (loadingText) loadingText.style.display = 'block';
+                
+//                 // 显示弹窗
+//                 if (modal) {
+//                     modal.style.display = 'flex';
+//                     const modalLoading = modal.querySelector('.modal-loading');
+//                     const modalSuccess = modal.querySelector('.modal-success');
+                    
+//                     if (modalLoading) modalLoading.style.display = 'block';
+//                     if (modalSuccess) modalSuccess.style.display = 'none';
+                    
+//                     await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+//                     if (modalLoading) modalLoading.style.display = 'none';
+//                     if (modalSuccess) modalSuccess.style.display = 'block';
+//                 }
+                
+//             } catch (error) {
+//                 console.error('Error:', error);
+//                 if (modal) modal.style.display = 'none';
+//                 if (submitButton) submitButton.style.display = 'block';
+//                 if (loadingText) loadingText.style.display = 'none';
+//                 alert('An error occurred. Please try again.');
+//             }
+//         });
+//     }
+// });
 
-            try {
-                // API Call
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    alert(result.message || 'Success!');
-                    
-                    // Save user info if login successful
-                    if (isLoginForm && result.user) {
-                        localStorage.setItem('user', JSON.stringify(result.user));
-                    }
-                    
-                    // Page redirection
-                    if (isLoginForm) {
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        window.location.href = 'login.html';
-                    }
-                } else {
-                    throw new Error(result.message || 'Operation failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'Server error, please try again later');
-            } finally {
-                if (loading) loading.style.display = 'none';
-            }
-        });
+try {
+    // loading
+    if (submitButton) submitButton.style.display = 'none';
+    if (loadingText) loadingText.style.display = 'block';
+
+    // Gather form data 收集表单数据
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => {
+        if (value && key !== 'remember') {
+            data[key] = value;
+        }
+    });
+
+    //Call API  调用API 
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        // Show popup 显示弹窗
+        if (modal) {
+            modal.style.display = 'flex';
+            const modalLoading = modal.querySelector('.modal-loading');
+            const modalSuccess = modal.querySelector('.modal-success');
+            
+            if (modalLoading) modalLoading.style.display = 'block';
+            if (modalSuccess) modalSuccess.style.display = 'none';
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            if (modalLoading) modalLoading.style.display = 'none';
+            if (modalSuccess) modalSuccess.style.display = 'block';
+        }
+
+        if (isLoginForm && result.user) {
+            localStorage.setItem('user', JSON.stringify(result.user));
+        }
+    } else {
+        throw new Error(result.message || 'Operation failed');
     }
+    
+} catch (error) {
+    console.error('Error:', error);
+    const errorMessage = document.querySelector('.error-message');
+    if (errorMessage) {
+        errorMessage.textContent = error.message || 'Server error, please try again later';
+        errorMessage.style.display = 'block';
+    }
+    if (modal) modal.style.display = 'none';
+    if (submitButton) submitButton.style.display = 'block';
+    if (loadingText) loadingText.style.display = 'none';
+}
+});
+}
 });
 
-// Function to view all users data
-async function viewAllUsers() {
-    try {
-        const BASE_URL = 'http://127.0.0.1:8000';
-        const response = await fetch(`${BASE_URL}/api/users`);
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            console.table(result.data); // Display user data in console
-            return result.data;
-        } else {
-            throw new Error(result.message || 'Failed to get user data');
+
+// get CSRF Token function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
     }
+    return cookieValue;
 }
 
 // Get current logged-in user info
@@ -98,10 +136,4 @@ function getCurrentUser() {
         return user;
     }
     return null;
-}
-
-// Logout function
-function logout() {
-    localStorage.removeItem('user');
-    window.location.href = 'login.html';
 }

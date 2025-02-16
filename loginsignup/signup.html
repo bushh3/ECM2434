@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign up</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body class="login-page">
     <div class="container">
@@ -12,39 +12,55 @@
         <h3>Create a new account<br><br></h3>
         <div class="data">
             <form action="#">
-                <!-- form-control class -->
+                <!-- error message display -->
+                <div class="error-message" style="display: none;"></div>
+
                 <div class="form-group">
-                    <input type="email" class="form-control" placeholder="Email" required><br><br>
+                    <input type="text" name="username" class="form-control" placeholder="Username" required><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="First name" required><br><br>
+                    <input type="email" name="email" class="form-control" placeholder="Email" required><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Last name" required><br><br>
+                    <input type="text" name="first_name" class="form-control" placeholder="First name" required><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" class="form-control" oninput="this.value = this.value.replace(/\D/g, '')" placeholder="Student ID" required><br><br>
+                    <input type="text" name="last_name" class="form-control" placeholder="Last name" required><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="password" class="form-control" placeholder="Password" required><br><br>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required><br><br>
                 </div>
 
-                <!-- sign-btn class -->
-                 <!-- sign up button（big） -->
                 <div class="form-group">
-                    <input type="submit" class="form-control sign-btn" value="Sign up"><br><br>
+                    <div class="button-container">
+                        <input type="submit" class="form-control sign-btn" value="Sign up">
+                        <span class="loading-text" style="display: none;">Loading...</span>
+                    </div>
                 </div>
-                <!-- signin--btn class -->
-                 <!-- signin button(small) -->
+
                 <div class="sign-in">
                     <span>already have an account?</span>
-                    <input type="button" class="signin-btn" value="Sign in" onclick="window.location.href='index.html';">
+                    <input type="button" class="signin-btn" value="Sign in" onclick="window.location.href='./index.html';">
                 </div>
             </form>
         </div>
     </div>
+    <div class="success-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-loading" style="display: none;">
+                <h2>Loading...</h2>
+            </div>
+            <div class="modal-success" style="display: none;">
+                <h2>Success!</h2>
+                <p>Your account has been created successfully!</p >
+                <button class="modal-btn" onclick="window.location.href='./index.html';">Back to Login</button>
+            </div>
+        </div>
+    </div>
+    <script src="./script.js"></script>
 </body>
+</html>
