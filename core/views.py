@@ -49,7 +49,13 @@ def signup(request):
 
         try:
             # create user
-            user = User.objects.create_user(username=username, email=email, first_name=first_name, last_name=last_name, password=password)
+            user = User.objects.create_user(
+            username=username, 
+            email=email, 
+            first_name=first_name, 
+            last_name=last_name, 
+            password=password
+            )
             user.save()
 
             # add user as player in database
@@ -57,8 +63,13 @@ def signup(request):
             player.save()
 
             # authenticate and log in
-            user = authenticate(username=username, password=password)
-            login(request, user)
+            authenticated_user = authenticate(
+            username=username, 
+            password=password
+            )
+            
+            if authenticated_user:
+                login(request, authenticated_user)
 
             # redirect to home page
             # this may need changing, will be able to test once there is a home page
