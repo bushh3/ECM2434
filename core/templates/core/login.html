@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In</title>
+    <title>Welcome!</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
-
 </head>
 <body>
     <div class="container">
@@ -14,33 +13,39 @@
             Sign in
         </h1>
         <h3>
-            Use your Email<br><br>
+            Use your username<br><br>
         </h3>
         <div class="data">
-            <form action="{% url 'core:login' %}" method="post">
+            <form "{% url 'core:login' %}" method="post">
                 {% csrf_token %}
+                <!-- error message display -->
+                <div class="error-message" style="display: none;"></div>
+                
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Username" name="username"><br><br>
+                    <input type="text" name="username" class="form-control" placeholder="Username" required><br><br>
                 </div>
 
                 <div class="form-group">
-                    <input type="password" class="form-control" placeholder="Password" name="password"><br><br>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required><br><br>
                 </div>
 
+                <!-- Loading animation -->
+                <div class="loading" style="display: none;">Loading...</div>
+
                 <div class="form-group">
-                    <input type="checkbox">
+                    <input type="checkbox" name="remember">
                     <span class="chk-box">
                         Remember me<br><br>
                     </span>
                 </div>
 
                 <div class="form-group">
-                    <input type="submit" class="form-control log-btn" value="sign in"><br><br>
+                    <input type="submit" class="form-control sign-btn" value="Sign in"><br><br>
                 </div>
 
                 <div class="sign-up">
                     <span>Don't have an account?</span>
-                    <input type="button" class="signup-btn" value="Sign Up" onclick="window.location.href='../signup';">
+                    <input type="button" class="signup-btn" value="Sign up" onclick="window.location.href='{% url 'core:signup' %}';">
                 </div>
                 
                 <div class="error">
@@ -49,12 +54,10 @@
                     <p>Forgotten your password? <a href="{% url 'core:password_reset' %}">Reset password</a></p>
                     {% endif %}
                 </div>
-
-                <div class="reset-password">
-
-                </div>
+                
             </form>
         </div>
-        
+    </div>
+    <script src="./script.js"></script>
 </body>
 </html>
