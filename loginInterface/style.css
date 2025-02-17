@@ -20,7 +20,7 @@ html, .login-page {
     justify-content: center; /* 水平居中 */
     align-items: center; /* 垂直居中 */
     height: 100vh;
-    background-image: url("./pictures/turtle.jpg");
+    background-image: url("../pictures/raccoon2.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center; /* 确保背景图片显示中间部分 */
@@ -30,7 +30,7 @@ html, .login-page {
 .login-page .container{
     width: 350px;
     height: 550px;
-    background-color: rgba(237, 237, 237, 0.825);
+    background-color: rgba(237, 237, 237, 0.688);
 
     margin: 10% auto;
     color: rgb(0, 60, 6);
