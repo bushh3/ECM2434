@@ -16,7 +16,7 @@
             Use your username<br><br>
         </h3>
         <div class="data">
-            <form "{% url 'core:login' %}" method="post">
+            <form action="{% url 'core:login' %}" method="post">
                 {% csrf_token %}
                 <!-- error message display -->
                 <div class="error-message" style="display: none;"></div>
@@ -58,6 +58,6 @@
             </form>
         </div>
     </div>
-    <script src="./script.js"></script>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
