@@ -1,0 +1,14 @@
+# tests.py
+from django.test import TestCase
+from django.urls import reverse
+
+class SignupTests(TestCase):
+    def test_signup(self):
+        response = self.client.post(reverse('core:signup'), {
+            'username': 'newuser',
+            'email': 'newuser@example.com',
+            'first_name': 'New',
+            'last_name': 'User',
+            'password': 'newpassword'
+        })
+        self.assertEqual(response.status_code, 302)
