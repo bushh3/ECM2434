@@ -55,14 +55,13 @@ Developer is responsible for building, extending and redeploying applications, w
 
 ## Leaderboard System
 The leaderboard is ranked by points, and is used to motivate users to take more environmental action.
-### Ranking rule
- Those with higher points rank higher. If the user points are the same, the user who completes the task more times is ranked higher.  
+ **Ranking rule**: Those with higher points rank higher. If the user points are the same, the user who completes the task more times is ranked higher.  
  **Example**  
-  Rank | Username | Points | Tasks completed  
-  ------------------------------------------  
-   1   |    A     | 90     |  3  
-   2   |    B     | 80     |  2  
-   3   |    C     | 70     |  1  
+ **Rank | Username | Points | Tasks completed**  
+   ------------------------------------------  
+    1   |    A     | 90     |  3  
+    2   |    B     | 80     |  2  
+    3   |    C     | 70     |  1  
 
 ## Project Structure
 GreenQuest/  
