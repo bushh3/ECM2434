@@ -65,3 +65,42 @@ The leaderboard is ranked by points, and is used to motivate users to take more 
    3   |    C     | 70     |  1
 
 ## Project Structure
+GreenQuest/
+│── manage.py
+│── db.sqlite3
+│── asgi.py
+│── settings.py
+│── urls.py
+│── wsgi.py
+│
+├── core/
+│   ├── static/
+│   │   ├── images/
+│   │   ├── css/
+│   │   │   ├── style.css
+│   │   ├── js/
+│   │   │   ├── script.js
+│
+├── templates/
+│   ├── core/
+│   │   ├── login.html
+│   │   ├── signup.html
+│   ├── tasks/(change later)
+│   │   ├── task_list.html
+│   ├── leaderboard/(change later)
+│   │   ├── ranking.html
+│
+├── docs/
+│   ├── README.md
+│   ├── specifications.md
+
+## Project operation
+git clone https://github.com/amcaye/ECM2434.git
+cd ECM2434
+python -m venv venv
+venv\Scripts\activate
+pip install django
+pip install djangorestframework django-crispy-forms
+python manage.py migrate
+python manage.py runserver
+Then use the browser open http://127.0.0.1:8000/login/
