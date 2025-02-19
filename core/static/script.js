@@ -4,10 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (form) {
         const submitButton = form.querySelector('.sign-btn');
-        const loadingText = form.querySelector('.loading-text');
+        const loadingText = form.querySelector('.loading');  // 修改为 .loading
         const modal = document.querySelector('.success-modal');
-        const otherLoadingTexts = document.querySelectorAll('.loading-text:not(.loading)');
-        otherLoadingTexts.forEach(text => text.remove());
         
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -46,31 +44,28 @@ document.addEventListener('DOMContentLoaded', function() {
 // });
 
 try {
-    // loading
+    // Loading state
     if (submitButton) submitButton.style.display = 'none';
     if (loadingText) loadingText.style.display = 'block';
 
-    // Gather form data 收集表单数据
-    const formData = new FormData(form);
-    const data = {};
-    formData.forEach((value, key) => {
-        if (value && key !== 'remember') {
-            data[key] = value;
-        }
-    });
+    // 判断是登录还是注册表单
+    const isLoginForm = !form.querySelector('input[name="first_name"]');
+    console.log('Is login form:', isLoginForm);
 
-    //Call API  调用API 
-    const response = await fetch(apiUrl, {
+    // 直接使用表单数据
+    const formData = new FormData(form);
+    
+    // 调用API
+    const response = await fetch(form.action, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCookie('csrftoken')
         },
         credentials: 'include',
-        body: JSON.stringify(data)
+        body: formData  // 直接使用 FormData
     });
 
-    const result = await response.json();
+
 
     if (response.ok) {
         // Show popup 显示弹窗
@@ -88,12 +83,20 @@ try {
             if (modalSuccess) modalSuccess.style.display = 'block';
         }
 
-        if (isLoginForm && result.user) {
-            localStorage.setItem('user', JSON.stringify(result.user));
+        // 根据表单类型处理重定向
+        if (isLoginForm) {
+            window.location.href = '/';  // 登录成功后跳转到首页
+        } else {
+            // 注册成功后等待3秒然后跳转到登录页
+            setTimeout(() => {
+                window.location.href = '/login/';
+            }, 3000);
         }
     } else {
-        throw new Error(result.message || 'Operation failed');
+        throw new Error('Error');
     }
+    
+
     
 } catch (error) {
     console.error('Error:', error);
@@ -127,13 +130,3 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Get current logged-in user info
-function getCurrentUser() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-        const user = JSON.parse(userStr);
-        console.log('Current logged-in user:', user);
-        return user;
-    }
-    return null;
-}

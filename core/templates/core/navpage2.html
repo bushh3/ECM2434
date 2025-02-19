@@ -1,16 +1,18 @@
 <!DOCTYPE html>
+{% load static%}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>navpage</title>
-    <link rel="stylesheet" href="navpage2.css">
+    <link rel="stylesheet" href="{% static 'navpage2.css' %}">
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <!--1. profile-->
-        <div class="item active" style="background-image: url(../core/static/pictures/earth2.jpg);">
+        <div class="item active" style="background-image: url('{% static 'pictures/earth2.jpg' %}');">
+        
             <div class="shadow"></div>
             <div class="content">
                 <div class="icon">
@@ -23,7 +25,7 @@
             <!--click avatar to enter the profile page-->
             <a href="../profilepage/profile.html" class="avatar-link">
                 <div class="avatar-frame">
-                    <img src="../core/static/pictures/fox.jpg" alt="Avatar">
+                    <img src="{% static 'pictures/fox.jpg' %}" alt="Avatar">
                 </div>
             </a>
             <!-- leaderboard and score -->
@@ -36,7 +38,7 @@
             </a>
         </div>
         <!--2. quiz-->
-        <div class="item" style="background-image: url(../core/static/pictures/light2.jpg);">
+        <div class="item" style="background-image: url('{% static 'pictures/light2.jpg' %}');">
             <div class="shadow"></div>
             <div class="content">
                 <div class="icon">
@@ -58,7 +60,7 @@
         </div>
         
         <!--3. Recycling Master-->
-        <div class="item" style="background-image: url(../core/static/pictures/can.jpg);">
+        <div class="item" style="background-image: url('{% static 'pictures/can.jpg' %}');">
             <div class="shadow"></div>
             <div class="content">
                 <div class="icon">
@@ -77,7 +79,7 @@
             </a >
         </div>
         <!--4. Green Travel Expert-->
-        <div class="item" style="background-image: url(../core/static/pictures/run3.jpg);">
+        <div class="item" style="background-image: url('{% static 'pictures/run3.jpg' %}');">
             <div class="shadow"></div>
             <div class="content">
                 <div class="icon">
@@ -103,7 +105,7 @@
                 <h3>Content: </h3>
                 <p>Take the environmental knowledge quiz, answer 5 questions correctly and get a reward.</p><br>
                 <h3>Goal: </h3>
-                <p>Through interactive Q&A, let users learn environmental protection knowledge.</p><br>
+                <p>Through interactive Q/A, let users learn environmental protection knowledge.</p><br>
                 <h3>Method: </h3>
                 <p>After the user clicks "Start Quiz", the system randomly selects 5 questions related to environmental protection, and after the user completes the test, all pairs can be rewarded.</p><br>
                 <h3>Rewards: </h3>
@@ -141,5 +143,5 @@
         </div>
 
     </div>
-    <script src="navpage2.js"></script>
+    <script src="{% static 'navpage2.js' %}"></script>
 </body>
