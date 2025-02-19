@@ -18,12 +18,12 @@ This project is built using the following technologies:
 ## Main Features
 This project supports **three types of users**, each with different functions and permissions.
 ### Player
-Regular users, such as students and staff, earn points for completing environmental tasks.
- **User system**: After registering and logging in, player can participate in game tasks.
- **Task system**: Player can complete recycling challenges, campus walks challenges and environmental knowledge competitions.
- **Location check-in**: Player can check in using QR code or GPS to verify task completion.
- **Point reward**: Player can earn points after completing missions, which can be used for leaderboard ranking.
- **Leaderboards**: Player can view their points ranking, which can inspire more people to participate in environmental action.
+Regular users, such as students and staff, earn points for completing environmental tasks.  
+ **User system**: After registering and logging in, player can participate in game tasks.  
+ **Task system**: Player can complete recycling challenges, campus walks challenges and environmental knowledge competitions.  
+ **Location check-in**: Player can check in using QR code or GPS to verify task completion.  
+ **Point reward**: Player can earn points after completing missions, which can be used for leaderboard ranking.  
+ **Leaderboards**: Player can view their points ranking, which can inspire more people to participate in environmental action.  
  **Data security**: User information complies with GDPR regulations to ensure privacy and security.
 ### Game Keeper
 Game keeper is responsible for creating and managing applications, managing tasks and auditing user data, which can be students or staff.
