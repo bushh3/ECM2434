@@ -83,6 +83,5 @@ def signup(request):
             return render(request, 'core/signup.html',
                           {"error_message": error_message})
 
-
 def home(request):
-    pass # handle later
+    return render(request, 'core/navpage2.html')
