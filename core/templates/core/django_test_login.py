@@ -1,3 +1,4 @@
+# tests.py
 from django.test import TestCase
 from django.urls import reverse
 
@@ -20,6 +21,3 @@ class LoginTests(TestCase):
     def test_password_reset(self):
         response = self.client.get(reverse('core:password_reset'))
         self.assertEqual(response.status_code, 200)
-
-
-# Create your tests here.
