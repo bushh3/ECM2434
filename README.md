@@ -75,10 +75,8 @@ GreenQuest/
 ├── core/  
 │   ├── static/  
 │   │   ├── images/  
-│   │   ├── css/  
-│   │   │   ├── style.css  
-│   │   ├── js/  
-│   │   │   ├── script.js  
+│   │   ├── style.css    
+│   │   ├── script.js    
 │  
 ├── templates/  
 │   ├── core/  
