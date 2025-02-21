@@ -3,11 +3,11 @@ document.addEventListener("DOMContentLoaded", async function() {
     const questionNumber = document.getElementById("question-number");
     const options = document.querySelectorAll(".option");
     const progressBar = document.querySelector(".progress-per");
-    const progressIcon = document.getElementById("progress-icon"); // 获取 GIF 动图
+    const progressIcon = document.getElementById("progress-icon"); // get turkey gif
     let currentQuestionIndex = 0;
     const totalQuestions = 5; 
 
-    // 预加载音效
+    // preload SFX
     const correctSound = new Audio("sounds/correct.mp3");
     const wrongSound = new Audio("sounds/wrong.mp3");
 
@@ -70,13 +70,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 
     function updateProgress(callback) {
-        let progress = ((currentQuestionIndex + 1) / totalQuestions) * 100; // 计算进度
+        let progress = ((currentQuestionIndex + 1) / totalQuestions) * 100; // compute progress
 
         progressBar.style.transition = "width 0.5s ease-in-out";
         progressBar.style.width = `${progress}%`;
         progressBar.setAttribute("per", `${Math.round(progress)}%`);
 
-        // 让 GIF 动图同步移动
+        // gif and progress bar move in sync
         progressIcon.style.transition = "left 0.5s ease-in-out";
         progressIcon.style.left = `${progress}%`;
 
