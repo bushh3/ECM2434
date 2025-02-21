@@ -17,13 +17,13 @@ html, .login-page {
 /*sign page background*/
 .login-page {
     display: flex;
-    justify-content: center; /* 水平居中 */
-    align-items: center; /* 垂直居中 */
+    justify-content: center; 
+    align-items: center; 
     height: 100vh;
     background-image: url("./pictures/raccoon2.jpg");
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: center; /* 确保背景图片显示中间部分 */
+    background-position: center; 
     background-attachment: fixed;
 }
 /*hole sign page*/
@@ -66,15 +66,14 @@ html, .login-page {
     text-decoration: underline;
     font-size: 15px;
 }
-/**/
 
-/* 按钮容器样式 */
+
 .button-container {
     position: relative;
     width: 100%;
 }
 
-/* 加载文字样式 */
+/* LOADING text style */
 .loading-text {
     position: absolute;
     left: 50%;
@@ -85,7 +84,7 @@ html, .login-page {
     animation: bounce 1s infinite;
 }
 
-/* 弹窗背景 */
+/* popup background */
 .success-modal {
     position: fixed;
     top: 0;
@@ -99,7 +98,7 @@ html, .login-page {
     z-index: 1000;
 }
 
-/* 弹窗内容 */
+/* popup content */
 .modal-content {
     background-color: rgba(237, 237, 237, 0.95);
     padding: 30px;
@@ -110,7 +109,7 @@ html, .login-page {
     min-width: 300px;
 }
 
-/* Loading动画 */
+/* Loading animation */
 .modal-loading h2 {
     color: rgb(0, 60, 6);
     animation: bounce 1s infinite;
@@ -125,13 +124,12 @@ html, .login-page {
     }
 }
 
-/* 成功状态样式 */
+/* success state */
 .modal-success h2 {
     margin-bottom: 20px;
     color: rgb(0, 60, 6);
 }
 
-/* 弹窗按钮 */
 .modal-btn {
     margin-top: 20px;
     padding: 10px 30px;
