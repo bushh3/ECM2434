@@ -33,7 +33,6 @@ html, body {
     color: rgb(255, 255, 255);
     font-weight: bold;
     text-shadow: 
-       
         -1px  3px 0 rgba(0, 0, 0, 0.243),
          1px  3px 0 rgba(0, 0, 0, 0.236);
     font-size: 32px;
@@ -46,27 +45,25 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-
     box-shadow: 
         -1px 1px 0 rgba(0, 0, 0, 0.243),  /* 左上阴影 */
         1px 1px 0 rgba(0, 0, 0, 0.236),
-
         3px 1px 0 rgba(0, 0, 0, 0.243),
         -1px 3px 0 rgba(0, 0, 0, 0.243);  /* 左上阴影 */
-        
-
     position: absolute;
     top: 20vh; /* 70%  */
     left: 50%;
     transform: translateX(-50%); 
 }
 
+
+
 /* BACK */
 .back-button {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: rgba(0, 0, 0, 0.5); 
+    background: rgba(0, 0, 0, 0); 
     color: white;
     font-size: 18px;
     padding: 10px 20px;
