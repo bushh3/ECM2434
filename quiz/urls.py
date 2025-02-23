@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('questions/', views.fetch_questions, name='fetch_questions'),  # 获取问题
-    path('quiz-results/', views.quiz_results, name='quiz_results'),  # 获取分数
+    path('api/questions/', views.fetch_questions, name="fetch_questions"),  # get question
+    path('api/check-answer/', views.check_answer, name="check_answer"),  # check answer
+    path('api/quiz-results/', views.get_quiz_results, name="get_quiz_results"),  # get result
 ]

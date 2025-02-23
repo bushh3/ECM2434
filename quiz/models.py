@@ -2,13 +2,12 @@ from django.db import models
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
-    questions = models.ManyToManyField('Question', related_name='quizzes')
 
     def __str__(self):
         return self.title
 
 class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
     question_text = models.CharField(max_length=500)
     option1 = models.CharField(max_length=100)
     option2 = models.CharField(max_length=100)
@@ -18,3 +17,4 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text
+
