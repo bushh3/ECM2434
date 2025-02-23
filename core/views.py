@@ -88,3 +88,9 @@ def home(request):
         return render(request, 'core/navpage2.html')
     else:
         return HttpResponseRedirect('/login/')
+        
+def quiz(request):
+    return render(request, 'core/quiz.html')
+    
+def questions(request):
+    return render(request, 'core/questions.html')
