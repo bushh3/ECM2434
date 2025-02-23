@@ -14,3 +14,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # 确保你已经导入了 admin 模块
     path('quiz/', include('quiz.urls')),  # 包含 quiz 应用的 URL 路由
 ]
+

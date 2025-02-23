@@ -9,7 +9,7 @@ This project is built using the following technologies:
 ### Backend
  **Django**, **Django REST Framework**
 ### Database
- **SQLit**
+ **SQLite**
 ### API Design
  **RESTful API**
 ### User Authentication
