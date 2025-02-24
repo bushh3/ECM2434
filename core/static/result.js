@@ -1,15 +1,13 @@
 async function fetchQuizResults() {
     try {
-        const response = await fetch('/api/quiz-results/');
-        const resultText = await response.text();
-    
+        const resultText = document.getElementById('result-text').innerText;
         //return text like: "5|2|75|150"
-        const [correct, wrong, roundScore, totalScore] = resultText.split('|');
+        const [correct, wrong, currentScore, totalScore] = resultText.split('|');
         
 
         document.getElementById('correct').innerText = `Correct: ${correct}`;
         document.getElementById('wrong').innerText = `Wrong: ${wrong}`;
-        document.getElementById('round-score').innerText = `Round Score: ${roundScore}`;
+        document.getElementById('current-score').innerText = `Current Score: ${currentScore}`;
         document.getElementById('total-score').innerText = `Total Score: ${totalScore}`;
     } catch (error) {
         console.error("Error fetching quiz results:", error);

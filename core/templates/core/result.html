@@ -11,7 +11,7 @@
 </head>
 <body>
     <!-- back-button -->
-    <button class="back-button" id="back" onclick="location.href='{% url 'navpage2' %}'"><!---->
+    <button class="back-button" id="back" onclick="location.href='{% url 'core:home' %}'"><!---->
         <i class="fa fa-sign-out"></i> BACK
     </button>
 
@@ -22,7 +22,8 @@
         <h3>Round Score: <span id="current-score">...</span></h3>
         <h3>Total Score: <span id="total-score">...</span></h3>
         <!-- try again -->
-        <button class="retry" onclick="location.href='{% url 'quiz_page' %}'">Try Again</button><!---->
+        <button class="retry" onclick="location.href='{% url 'core:quiz' %}'">Try Again</button><!---->
     </div>
+    <div id="result-text" style="display: none;">{{ result_text }}</div>
 </body>
 </html>

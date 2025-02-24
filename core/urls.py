@@ -14,7 +14,7 @@ urlpatterns = [
     path('quiz/', views.quiz, name="quiz"),
     path('questions/', views.fetch_questions, name="fetch_questions"),  # get question
     path('check-answer/', views.check_answer, name="check_answer"),  # check answer
-    path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),  # get result
+    path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('admin/', admin.site.urls),  # 确保你已经导入了 admin 模块
 ]
 

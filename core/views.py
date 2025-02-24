@@ -113,4 +113,4 @@ def get_quiz_results(request):
 
     result_text = f"{correct}|{wrong}|{round_score}|{total_score}"
 
-    return HttpResponse(result_text, content_type="text/plain")  
+    return render(request, 'core/result.html', {'result_text': result_text})  

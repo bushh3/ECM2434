@@ -64,8 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // End the quiz
     function endQuiz() {
-        alert(`Quiz over! Your score is ${score}/${totalQuestions}.`);
-        // Optionally, reset the quiz or redirect to a results page
+        window.location.href = '/quiz-results/';
     }
 
     // Add event listeners to option buttons
