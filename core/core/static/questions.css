@@ -1,0 +1,117 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    /* background-image: linear-gradient(280deg, #6ec2e8, #ddffb3); */
+    background-color: #d5dea1;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.quiz-container {
+    background: #ffffff78;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    min-width: 300px; 
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(200px);
+}
+h2 {
+    margin-bottom: 10px;
+}
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.option {
+    background-color: rgb(98, 146, 123);
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.correct {
+    background-color: #60c964 !important;
+}
+
+.wrong {
+    background-color: #a04e4e !important;
+}
+
+/* progress bar */
+.progress {
+    width: 90%;
+    max-width: 600px;
+    padding: 0 20px;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* GIF over bar */
+.progress-icon {
+    width: 50px; /* control GIF size */
+    height: auto;
+    position: absolute;
+    bottom: 100%; /* 对齐 */
+    left: 0%; /* Innitial position */
+    transform: translateX(-50%);
+    transition: left 0.5s ease-in-out; 
+    display: block;
+}
+
+/* progress bar(ground) */
+.progress-bar {
+    width: 100%;
+    height: 14px; 
+    background: #744e28;
+    border-radius: 3px;
+    overflow: visible; 
+    position: relative;
+}
+
+/* porgress var (grass) */
+.progress-per {
+    width: 0%;
+    height: 14px;
+    background: #5ca960;
+    border-radius: 3px;
+    position: relative;
+    transition: width 0.5s ease-in-out;
+}
+
+
+/* grass */
+.grass-overlay {
+    position: absolute;
+    top: -65px;  
+    left: 0;
+    height: 120px;
+    width: 0%; /* Initial width 0 */
+    background: url('./pictures/grass.gif') repeat-x; 
+    background-position: left bottom;
+    background-size: auto 100%;
+    transform-origin: left bottom;
+    overflow: hidden;
+ 
+}
+/* progress var fill animation */
+@keyframes fillBars {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
