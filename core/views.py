@@ -4,32 +4,9 @@ from django.urls import reverse
 from django.db.models import F
 from .models import *
 from django.contrib.auth.models import User
-
 from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
-# Create your views here.
-
-# delete this later
-"""
-def login(request):
-    if request.POST == {}:
-        return render(request, "core/login.html")
-    else:
-        email = request.POST["email"]
-        password = request.POST["password"]
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-           login(request, user)
-           print('successful?')
-           return HttpResponseRedirect("core:home")
-            #Redirect to home page
-        else:
-            #return an invalid login error message
-            return render(request, 
-                          "core/login.html",
-                          {"error_message": "Invalid details: please try again"})
-"""
-
+import json
 
 def signup(request):
     # if no POST, display sign up page
@@ -92,5 +69,48 @@ def home(request):
 def quiz(request):
     return render(request, 'core/quiz.html')
     
-def questions(request):
-    return render(request, 'core/questions.html')
+# View to fetch all questions from the database
+def fetch_questions(request):
+    questions = Question.objects.all() 
+    questions_json = json.dumps([
+        {
+            "id": question.id,
+            "question_text": question.question_text,
+            "options": [question.option1, question.option2, question.option3, question.option4],
+            "correct_option": question.correct_option
+        }
+        for question in questions
+    ])
+    return render(request, 'core/questions.html', {'questions_json': questions_json})
+
+# View to check the user's answer for a specific question
+def check_answer(request):
+    if request.method == "POST":
+        selected_option = request.POST.get('option')
+        question_id = int(request.POST.get('question_id')) 
+        
+        try:
+            #fetch the question by ID
+            question = Question.objects.get(id=question_id)
+        except Question.DoesNotExist:
+            # If the question does not exist, return an error
+            return HttpResponse('Invalid question ID', status=400)
+
+        # Check if the selected answer is correct
+        if selected_option == question.correct_option:
+            return HttpResponse('correct') 
+        else:
+            return HttpResponse(f'wrong-{question.correct_option}')
+    
+    return HttpResponse('Invalid request', status=400)
+
+# View to get the quiz results
+def get_quiz_results(request):
+    correct = 5  
+    wrong = 2  
+    round_score = 75  
+    total_score = 150  
+
+    result_text = f"{correct}|{wrong}|{round_score}|{total_score}"
+
+    return HttpResponse(result_text, content_type="text/plain")  

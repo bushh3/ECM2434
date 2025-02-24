@@ -1,97 +1,49 @@
-document.addEventListener("DOMContentLoaded", async function() {
-    const questionText = document.getElementById("question-text");
-    const questionNumber = document.getElementById("question-number");
-    const options = document.querySelectorAll(".option");
-    const progressBar = document.querySelector(".progress-per");
-    const progressIcon = document.getElementById("progress-icon"); 
-    
+document.addEventListener('DOMContentLoaded', () => {
+    const questionNumber = document.getElementById('question-number');
+    const questionText = document.getElementById('question-text');
+    const optionButtons = document.querySelectorAll('.option');
+    const progressBar = document.querySelector('.progress-per');
+    const progressIcon = document.getElementById('progress-icon');
+
     let currentQuestionIndex = 0;
-    let questions = [];
-    let totalQuestions = 0;
+    let score = 0;
+    const totalQuestions = questions.length;
 
-    // preload sounds effects
-    const correctSound = new Audio("/static/sounds/correct.mp3");
-    const wrongSound = new Audio("/static/sounds/wrong.mp3");
-
-
-    // fetch questions
-    async function fetchQuestions() {
-        try {
-            const response = await fetch('/api/questions/');
-            questions = await response.text();  
-            totalQuestions = questions.length;
-            loadQuestion();
-        } catch (error) {
-            questionText.textContent = "Failed to load the question. Please refresh the page and try again.";
-        }
-    }
-
+    // Load the current question
     function loadQuestion() {
-        if (currentQuestionIndex >= totalQuestions) {
-            return;
-        }
-
-        let question = questions[currentQuestionIndex];
-        questionText.textContent = question.text;
+        const question = questions[currentQuestionIndex];
         questionNumber.textContent = `Question ${currentQuestionIndex + 1}`;
+        questionText.textContent = question.question_text;
 
-        options.forEach((button, index) => {
-            const optionKey = ["A", "B", "C", "D"][index];
-            button.innerHTML = `${optionKey}. ${question.options[optionKey]}`;
-            button.classList.remove("correct", "wrong");
-            button.disabled = false;
-            button.onclick = () => checkAnswer(button, optionKey);
+        optionButtons.forEach((button, index) => {
+            button.querySelector('span').textContent = question.options[index];
         });
+
+        updateProgress();
     }
 
-    async function checkAnswer(button, selectedOption) {
-        options.forEach(btn => btn.disabled = true);
+    // Check the selected answer
+    function checkAnswer(selectedOption) {
+        const question = questions[currentQuestionIndex];
+        if (selectedOption === question.correct_option) {
+            score++;
+            alert('Correct!');
+        } else {
+            alert(`Wrong! The correct answer is ${question.correct_option}.`);
+        }
 
-        try {
-            //  FormData 
-            const formData = new FormData();
-            formData.append('option', selectedOption);
-            
-            const response = await fetch('/api/check-answer/', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.text(); 
-            
-            if (result === 'correct') {
-                button.classList.add("correct");
-                correctSound.play();
-            } else {
-                button.classList.add("wrong");
-                wrongSound.play();
-                const correctAnswer = result.split('-')[1];  
-                const correctButton = document.querySelector(`[data-option="${correctAnswer}"]`);
-                if (correctButton) {
-                    correctButton.classList.add("correct");
-                }
-            }
-
-            updateProgress(() => {
-                if (currentQuestionIndex + 1 < totalQuestions) {
-                    setTimeout(() => {
-                        currentQuestionIndex++;
-                        loadQuestion();
-                    }, 300);
-                } else {
-                    setTimeout(() => {
-                        window.location.href = "/quiz/result/";
-                    }, 600);
-                }
-            });
-
-        } catch (error) {
-            console.error('Failed to submit the answer:', error);
+        // Move to the next question
+        currentQuestionIndex++;
+        if (currentQuestionIndex < totalQuestions) {
+            loadQuestion();
+        } else {
+            endQuiz();
         }
     }
 
-    function updateProgress(callback) {
-        let progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+    // Update the progress bar
+    function updateProgress() {
+        const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
         const animationDuration = "1s";
         
         progressBar.style.transition = `width ${animationDuration} ease-in-out`;
@@ -103,14 +55,29 @@ document.addEventListener("DOMContentLoaded", async function() {
         let grassOverlay = document.getElementById("grass-overlay");
         grassOverlay.style.transition = `width ${animationDuration} ease-in-out`;
         grassOverlay.style.width = `${(currentQuestionIndex + 1) * 20}%`;
-    
+        
         progressBar.addEventListener("transitionend", function handleTransition() {
             progressBar.removeEventListener("transitionend", handleTransition);
             callback();
         });
     }
 
-    fetchQuestions();
+    // End the quiz
+    function endQuiz() {
+        alert(`Quiz over! Your score is ${score}/${totalQuestions}.`);
+        // Optionally, reset the quiz or redirect to a results page
+    }
+
+    // Add event listeners to option buttons
+    optionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const selectedOption = button.getAttribute('data-option');
+            checkAnswer(selectedOption);
+        });
+    });
+
+    // Load the first question
+    loadQuestion();
 });
 
 //TEST

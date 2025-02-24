@@ -98,7 +98,7 @@ h2 {
     left: 0;
     height: 120px;
     width: 0%; /* Initial width 0 */
-    background: url('../pictures/grass.gif') repeat-x; 
+    background: url('./pictures/grass.gif') repeat-x; 
     background-position: left bottom;
     background-size: auto 100%;
     transform-origin: left bottom;

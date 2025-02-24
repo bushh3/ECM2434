@@ -93,8 +93,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),  # 主页视图的路由
-    path('login/', views.login_view, name='login'),  # 登录页面的路由
+    path('', views.home, name='home'),
+    path('login/', views.login_view, name='login'),
 ]
 
 # core/tests.py
