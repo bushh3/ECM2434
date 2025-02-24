@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from django.test import TestCase
+from django.urls import reverse
+
 class LoginTests(TestCase):
     def test_login(self):
         # Use the appropriate user name and password in the test
