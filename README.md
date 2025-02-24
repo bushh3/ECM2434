@@ -9,7 +9,7 @@ This project is built using the following technologies:
 ### Backend
  **Django**, **Django REST Framework**
 ### Database
- **SQLit**
+ **SQLite**
 ### API Design
  **RESTful API**
 ### User Authentication
@@ -65,33 +65,47 @@ The leaderboard is ranked by points, and is used to motivate users to take more 
 
 ## Project Structure
 GreenQuest/  
-│── manage.py  
+│── GreenQuest/  
+│   │── __pycache__/  
+│   │── __init__.py  
+│   │── asgi.py  
+│   │── dashboard_setting_test.py  
+│   │── settings.py  
+│   │── urls.py  
+│   │── wsgi.py  
+│── Specification/  
+│── core/  
+│   │── __pycache__/  
+│   │── migrations/  
+│   │── static/  
+│   │   │── pictures/  
+│   │   │── navpage2.css  
+│   │   │── navpage2.js  
+│   │   │── navpage2_test.py  
+│   │   │── script.js  
+│   │   │── script_test.py  
+│   │   │── style.css  
+│   │── templates/  
+│   │   │── core/  
+│   │   │   │── django_test_login.py  
+│   │   │   │── django_test_signup.py  
+│   │   │   │── login.html  
+│   │   │   │── signup.html  
+│   │   │   │── navpage2.html  
+│   │── __init__.py  
+│   │── admin.py  
+│   │── apps.py  
+│   │── models.py  
+│   │── tests.py  
+│   │── urls.py  
+│   │── views.py  
 │── db.sqlite3  
-│── asgi.py  
-│── settings.py  
-│── urls.py  
-│── wsgi.py  
-│  
-├── core/  
-│   ├── static/  
-│   │   ├── images/  
-│   │   ├── style.css    
-│   │   ├── script.js    
-│  
-├── templates/  
-│   ├── core/  
-│   │   ├── login.html  
-│   │   ├── signup.html  
-│   ├── tasks/(change later)  
-│   │   ├── task_list.html  
-│   ├── leaderboard/(change later)  
-│   │   ├── ranking.html  
-│  
-├── docs/  
-│   ├── README.md  
-│   ├── specifications.md  
+│── manage.py  
+│── Quiz Q&A bank.docx  
+│── README.md    
 
-## Project operation
+## Project operation  
+```bash
 git clone https://github.com/amcaye/ECM2434.git  
 cd ECM2434  
 python -m venv venv  
@@ -100,4 +114,39 @@ pip install django
 pip install djangorestframework django-crispy-forms  
 python manage.py migrate  
 python manage.py runserver  
-Then use the browser open http://127.0.0.1:8000/login/  
+Then use the browser open http://127.0.0.1:8000/login/
+```
+## Testing Basic Functionalities (Login, Registration, Gamification)
+
+This repository contains a Django-based project that implements basic functionalities like user login, registration, password reset, and gamification features. It is integrated with GitHub Actions to automatically run tests on every push to the repository.
+
+### Features
+
+- **User Login**: Test the user login functionality.
+- **User Registration**: Test user sign-up and registration functionality.
+- **Password Reset**: Test password reset page functionality.
+- **Gamification**: Includes test cases for game-related functionality (e.g., score tracking and ranking).
+
+### Requirements
+
+Make sure you have the following installed:
+
+- **Python 3.6+**
+- **Django** (latest stable version)
+- **Git** (to manage version control)
+- **GitHub Account** (for pushing the code and CI setup)
+
+To install the dependencies, run:
+
+```bash
+pip install -r requirements.txt
+
+#How to Run Tests Locally
+##Set up the Django project:
+
+python manage.py migrate
+python manage.py createsuperuser
+
+##Run the Tests:
+python manage.py test
+```

@@ -83,6 +83,8 @@ def signup(request):
             return render(request, 'core/signup.html',
                           {"error_message": error_message})
 
-
 def home(request):
-    pass # handle later
+    if (request.user.is_authenticated):
+        return render(request, 'core/navpage2.html')
+    else:
+        return HttpResponseRedirect('/login/')

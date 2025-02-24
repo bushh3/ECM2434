@@ -3,6 +3,7 @@ from django.urls import reverse
 
 class LoginTests(TestCase):
     def test_login(self):
+        # Use the appropriate user name and password in the test
         response = self.client.post(reverse('core:login'), {
             'username': 'testuser',
             'password': 'testpassword'
@@ -10,16 +11,16 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_signup(self):
+        # Register the test, using the correct field name
         response = self.client.post(reverse('core:signup'), {
             'username': 'newuser',
-            'password1': 'newpassword',
-            'password2': 'newpassword'
+            'email': 'newuser@example.com',
+            'first_name': 'New',
+            'last_name': 'User',
+            'password': 'newpassword',
         })
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 302) 
 
     def test_password_reset(self):
         response = self.client.get(reverse('core:password_reset'))
         self.assertEqual(response.status_code, 200)
-
-
-# Create your tests here.
