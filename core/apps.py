@@ -1,5 +1,8 @@
-from django.apps import AppConfig
+"""
+author: Anna Mackay, Zhiqiao Luo
+"""
 
+from django.apps import AppConfig
 
 class CoreConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

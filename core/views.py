@@ -1,3 +1,6 @@
+"""
+author: Anna Mackay, Zhiqiao Luo
+"""
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -7,29 +10,6 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
-# Create your views here.
-
-# delete this later
-"""
-def login(request):
-    if request.POST == {}:
-        return render(request, "core/login.html")
-    else:
-        email = request.POST["email"]
-        password = request.POST["password"]
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-           login(request, user)
-           print('successful?')
-           return HttpResponseRedirect("core:home")
-            #Redirect to home page
-        else:
-            #return an invalid login error message
-            return render(request, 
-                          "core/login.html",
-                          {"error_message": "Invalid details: please try again"})
-"""
-
 
 def signup(request):
     # if no POST, display sign up page

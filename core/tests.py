@@ -1,4 +1,7 @@
-#Editor: Jiang, Xinyutong
+"""
+author: Jiang, Xinyutong, Zhiqiao Luo, Anna Mackay
+"""
+
 from django.test import TestCase
 from django.urls import reverse
 
