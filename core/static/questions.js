@@ -78,12 +78,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load the first question
     loadQuestion();
 });
-
-//TEST
-    // const questions = [
-    //     { text: "What is the center of the solar system?", options: { A: "Earth", B: "Mars", C: "Sun", D: "Jupiter" }, correctAnswer: "C" },
-    //     { text: "What is the chemical formula of water?", options: { A: "H2O", B: "CO2", C: "O2", D: "H2" }, correctAnswer: "A" },
-    //     { text: "What is the highest mountain in the world?", options: { A: "K2", B: "Mount Everest", C: "Kangchenjunga", D: "Annapurna" }, correctAnswer: "B" },
-    //     { text: "Who is one of the founders of Apple Inc.?", options: { A: "Bill Gates", B: "Steve Jobs", C: "Mark Zuckerberg", D: "Larry Page" }, correctAnswer: "B" },
-    //     { text: "What are the first two decimal places of π (pi)?", options: { A: "3.12", B: "3.15", C: "3.14", D: "3.16" }, correctAnswer: "C" }
-    // ];
