@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+"""
+author: Zhiqiao Luo, Anna Mackay
+"""
 import os
 import sys
 

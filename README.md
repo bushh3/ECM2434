@@ -150,3 +150,8 @@ python manage.py createsuperuser
 ##Run the Tests:
 python manage.py test
 ```
+
+## Admin information for quiz/real-quiz branch
+admin_username: admin
+admin_password: admin123
+admin_email: admin@admin.com
