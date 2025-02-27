@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.db.models import F
@@ -6,7 +6,9 @@ from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
 import json
+import random
 
 def signup(request):
     # if no POST, display sign up page
@@ -71,7 +73,20 @@ def quiz(request):
     
 # View to fetch all questions from the database
 def fetch_questions(request):
-    questions = Question.objects.all() 
+    questions = list(Question.objects.all()) 
+    selected_questions = random.sample(questions, min(5, len(questions)))
+
+    session_data = {
+        str(index + 1): {
+            'id': question.id,
+            'correct_option': question.correct_option
+        }
+        for index, question in enumerate(selected_questions)
+    }
+
+    request.session['current_questions'] = session_data
+    request.session.modified = True  # make sure that the session changes take effect
+
     questions_json = json.dumps([
         {
             "id": question.id,
@@ -79,38 +94,66 @@ def fetch_questions(request):
             "options": [question.option1, question.option2, question.option3, question.option4],
             "correct_option": question.correct_option
         }
-        for question in questions
+        for question in selected_questions
     ])
     return render(request, 'core/questions.html', {'questions_json': questions_json})
 
 # View to check the user's answer for a specific question
+@login_required
 def check_answer(request):
     if request.method == "POST":
-        selected_option = request.POST.get('option')
-        question_id = int(request.POST.get('question_id')) 
+        session_questions = request.session.get('current_questions', {})
+        total_questions = len(session_questions)
+        score_per_question = 5
         
-        try:
-            #fetch the question by ID
-            question = Question.objects.get(id=question_id)
-        except Question.DoesNotExist:
-            # If the question does not exist, return an error
-            return HttpResponse('Invalid question ID', status=400)
+        correct = 0
+        wrong = 0
 
-        # Check if the selected answer is correct
-        if selected_option == question.correct_option:
-            return HttpResponse('correct') 
-        else:
-            return HttpResponse(f'wrong-{question.correct_option}')
-    
-    return HttpResponse('Invalid request', status=400)
+        for key, user_answer in request.POST.items():
+            if key.startswith('question_'):
+                question_index = key.split('_')[1]
+                
+                # get the correct option
+                correct_option = session_questions.get(question_index, {}).get('correct_option')
+                if correct_option and user_answer == correct_option:
+                    correct += 1
+                else:
+                    wrong += 1
+        
+        # calculate the score
+        current_score = correct * score_per_question
+        
+        player = request.user.player
+        player.points += current_score
+        player.save()
 
-# View to get the quiz results
+        # log to session
+        request.session['quiz_result'] = {
+            'correct': correct,
+            'wrong': wrong,
+            'current_score': current_score,
+            'total_score': player.points
+        }
+        # request.session['total_score'] = total_score
+        request.session.modified = True
+
+        return HttpResponseRedirect(reverse('core:get_quiz_results'))
+
+@login_required
 def get_quiz_results(request):
-    correct = 5  
-    wrong = 2  
-    round_score = 75  
-    total_score = 150  
+    player = request.user.player
+    quiz_result = request.session.get('quiz_result', {
+        'correct': 0,
+        'wrong': 0,
+        'current_score': 0,
+        'total_score': player.points
+    })
 
-    result_text = f"{correct}|{wrong}|{round_score}|{total_score}"
-
+    correct = quiz_result['correct']
+    wrong = quiz_result['wrong']
+    current_score = quiz_result['current_score']
+    total_score = quiz_result['total_score']
+    
+    result_text = f"{correct}|{wrong}|{current_score}|{total_score}"
+    
     return render(request, 'core/result.html', {'result_text': result_text})  

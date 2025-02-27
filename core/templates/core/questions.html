@@ -9,23 +9,31 @@
     <script defer src="{% static 'questions.js' %}"></script>
 </head>
 <body>
+    <form id="csrf-form" style="display: none;">
+        {% csrf_token %}
+    </form>
+    
+    <script>
+        const correctSound = new Audio("{% static 'sounds/correct.mp3' %}");
+        const wrongSound = new Audio("{% static 'sounds/wrong.mp3' %}");
+    </script>
 
     <div class="quiz-container">
         <h2 id="question-number">Question 1</h2>
         <h3 id="question-text">Loading...</h3>
 
         <div class="options">
-            <button class="option" data-option="A">A. <span></span></button>
-            <button class="option" data-option="B">B. <span></span></button>
-            <button class="option" data-option="C">C. <span></span></button>
-            <button class="option" data-option="D">D. <span></span></button>
+            <button class="option" data-option="A"><span></span></button>
+            <button class="option" data-option="B"><span></span></button>
+            <button class="option" data-option="C"><span></span></button>
+            <button class="option" data-option="D"><span></span></button>
         </div>
     </div>
 
-    <!-- 进度条 -->
+    <!-- progress bar -->
      <div class="progress">
         <div class="progress-bar">
-            <div class="progress-per" per="0%" style="max-width: 100%;"></div>
+            <div class="grass-overlay" id="grass-overlay"></div>
             <img src="{% static 'pictures/turkey.gif' %}" class="progress-icon" id="progress-icon">
             <div class="progress-per" per="0%" style="max-width: 100%;"></div>
             <!-- grass -->

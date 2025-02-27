@@ -5,47 +5,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.querySelector('.progress-per');
     const progressIcon = document.getElementById('progress-icon');
 
+    let userAnswers = [];
     let currentQuestionIndex = 0;
-    let score = 0;
-    const totalQuestions = questions.length;
+    let finished = 0;
+    const totalQuestions = 5;//how many questions once a time, can be changed
 
     // Load the current question
     function loadQuestion() {
-        const question = questions[currentQuestionIndex];
-        questionNumber.textContent = `Question ${currentQuestionIndex + 1}`;
+        const question = questions[currentQuestionIndex];//random questions No.
+        questionNumber.textContent = `Question ${currentQuestionIndex + 1 }`;
         questionText.textContent = question.question_text;
 
         optionButtons.forEach((button, index) => {
             button.querySelector('span').textContent = question.options[index];
         });
-
         updateProgress();
     }
 
     // Check the selected answer
-    function checkAnswer(selectedOption) {
+    function checkAnswer(selectedOption, button) {
         const question = questions[currentQuestionIndex];
+        userAnswers.push({
+            id: question.id,
+            answer: selectedOption
+        });
+        finished++;
         if (selectedOption === question.correct_option) {
-            score++;
-            alert('Correct!');
+            button.classList.add("correct");
+            correctSound.play();
         } else {
-            alert(`Wrong! The correct answer is ${question.correct_option}.`);
+            button.classList.add("wrong");
+            wrongSound.play();
+            //will show correct answer if you wrong
+            optionButtons.forEach(btn => {
+                if (btn.getAttribute("data-option") === question.correct_option) {
+                    btn.classList.add("correct");
+                }
+            });
         }
-
         // Move to the next question
-        currentQuestionIndex++;
-        if (currentQuestionIndex < totalQuestions) {
-            loadQuestion();
-        } else {
-            endQuiz();
-        }
-    }
-
-    // Update the progress bar
-    function updateProgress() {
-        const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
-        const animationDuration = "1s";
+        setTimeout(() => {
         
+            optionButtons.forEach(btn => {
+                btn.classList.remove("correct", "wrong");
+            });
+    
+            currentQuestionIndex++;////////////////////////////////////////////////
+            if (currentQuestionIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                updateProgress(endQuiz);
+            }
+        }, 1000);
+    }
+    
+    // Update the progress bar
+    function updateProgress(callback) {
+        const progress = (finished / totalQuestions) * 100;
+        const animationDuration = "1s";
         progressBar.style.transition = `width ${animationDuration} ease-in-out`;
         progressBar.style.width = `${progress}%`;
         
@@ -54,24 +71,48 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let grassOverlay = document.getElementById("grass-overlay");
         grassOverlay.style.transition = `width ${animationDuration} ease-in-out`;
-        grassOverlay.style.width = `${(currentQuestionIndex + 1) * 20}%`;
+        grassOverlay.style.width = `${progress}%`;
         
         progressBar.addEventListener("transitionend", function handleTransition() {
             progressBar.removeEventListener("transitionend", handleTransition);
-            callback();
+            if(callback){
+                callback();
+            }
         });
     }
 
-    // End the quiz
-    function endQuiz() {
-        window.location.href = '/quiz-results/';
+    // End the quiz (send user's answer to backend to compute score)(need modify)
+    window.endQuiz = function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/check-answer/';
+
+        //CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'csrfmiddlewaretoken';
+        tokenInput.value = csrfToken;
+        form.appendChild(tokenInput);
+
+        userAnswers.forEach((item, index) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            // question_1, question_2... 
+            input.name = `question_${index + 1}`;
+            input.value = item.answer;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // Add event listeners to option buttons
     optionButtons.forEach(button => {
         button.addEventListener('click', () => {
             const selectedOption = button.getAttribute('data-option');
-            checkAnswer(selectedOption);
+            checkAnswer(selectedOption, button);
         });
     });
 
