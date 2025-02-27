@@ -10,6 +10,21 @@ from django.contrib.auth.decorators import login_required
 import json
 import random
 
+def login(request):
+    if request.method != "POST":
+        return render(request, "core/login.html")
+    else:
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse("core:home"))
+        else:
+            return render(request,
+                         "core/login.html",
+                         {"error_message": "Invalid details: please try again"})
+
 def signup(request):
     # if no POST, display sign up page
     if request.POST == {}:

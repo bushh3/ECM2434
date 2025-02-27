@@ -6,6 +6,7 @@
     <title>Welcome!</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
+
 </head>
 <body class="login-page">
     <div class="container">
@@ -18,8 +19,6 @@
         <div class="data">
             <form action="{% url 'core:login' %}" method="post">
                 {% csrf_token %}
-                <!-- error message display -->
-                <div class="error-message" style="display: none;"></div>
                 
                 <div class="form-group">
                     <input type="text" name="username" class="form-control" placeholder="Username" required><br><br>
@@ -48,9 +47,13 @@
                     <input type="button" class="signup-btn" value="Sign up" onclick="window.location.href='{% url 'core:signup' %}';">
                 </div>
                 
-                <div class="error">
+                <div class="error error-message" style="display: {% if error_message %}block{% else %}none{% endif %};">
+                    {% if error_message %}
+                        {{ error_message }}
+                    {% elif form.errors %}
+                        Invalid username or password
+                    {% endif %}
                     {% if form.errors %}
-                    <p>Invalid details: please try again</p>
                     <p>Forgotten your password? <a href="{% url 'core:password_reset' %}">Reset password</a></p>
                     {% endif %}
                 </div>
@@ -58,6 +61,9 @@
             </form>
         </div>
     </div>
+    
+    
+    
     <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
