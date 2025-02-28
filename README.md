@@ -104,8 +104,7 @@ GreenQuest/
 │── Quiz Q&A bank.docx  
 │── README.md    
 
-## Project operation  
-```bash
+## Project operation
 git clone https://github.com/amcaye/ECM2434.git  
 cd ECM2434  
 python -m venv venv  
@@ -114,44 +113,4 @@ pip install django
 pip install djangorestframework django-crispy-forms  
 python manage.py migrate  
 python manage.py runserver  
-Then use the browser open http://127.0.0.1:8000/login/
-```
-## Testing Basic Functionalities (Login, Registration, Gamification)
-
-This repository contains a Django-based project that implements basic functionalities like user login, registration, password reset, and gamification features. It is integrated with GitHub Actions to automatically run tests on every push to the repository.
-
-### Features
-
-- **User Login**: Test the user login functionality.
-- **User Registration**: Test user sign-up and registration functionality.
-- **Password Reset**: Test password reset page functionality.
-- **Gamification**: Includes test cases for game-related functionality (e.g., score tracking and ranking).
-
-### Requirements
-
-Make sure you have the following installed:
-
-- **Python 3.6+**
-- **Django** (latest stable version)
-- **Git** (to manage version control)
-- **GitHub Account** (for pushing the code and CI setup)
-
-To install the dependencies, run:
-
-```bash
-pip install -r requirements.txt
-
-#How to Run Tests Locally
-##Set up the Django project:
-
-python manage.py migrate
-python manage.py createsuperuser
-
-##Run the Tests:
-python manage.py test
-```
-
-## Admin information for quiz/real-quiz branch
-admin_username: admin
-admin_password: admin123
-admin_email: admin@admin.com
+Then use the browser open http://127.0.0.1:8000/login/  
