@@ -15,20 +15,14 @@ class Player(models.Model):
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
 
-    def __str__(self):
-        return self.title
-
 class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE)
-    question_text = models.CharField(max_length=500)
-    option1 = models.CharField(max_length=100, default="Default Option 1")
-    option2 = models.CharField(max_length=100, default="Default Option 2")
-    option3 = models.CharField(max_length=100, default="Default Option 3")
-    option4 = models.CharField(max_length=100, default="Default Option 4")
-    correct_option = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], default='A')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    question_text = models.CharField(max_length=200)
 
-    def __str__(self):
-        return self.question_text
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    text = models.CharField(max_length=200)
+    correct = models.BooleanField()
 
 class PlayerQuiz(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
