@@ -83,6 +83,9 @@ def home(request):
         
 def quiz(request):
     return render(request, 'core/quiz.html')
+
+def profile_view(request):
+    return render(request, 'core/profile.html')
     
 # View to fetch all questions from the database
 def fetch_questions(request):
