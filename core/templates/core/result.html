@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Results</title>
     <link rel="stylesheet" href="{% static 'result.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="{% static 'result.js' %}" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- back-button -->
@@ -25,5 +24,7 @@
         <button class="retry" onclick="location.href='{% url 'core:quiz' %}'">Try Again</button><!---->
     </div>
     <div id="result-text" style="display: none;">{{ result_text }}</div>
+
+    <script src="{% static 'result.js' %}" defer></script>
 </body>
 </html>
