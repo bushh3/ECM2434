@@ -6,6 +6,7 @@ class LoginTests(TestCase):
         # Use the appropriate user name and password in the test
         response = self.client.post(reverse('core:login'), {
             'username': 'testuser',
+            'email": "test@example.com',
             'password': 'testpassword'
         })
         self.assertEqual(response.status_code, 200)
