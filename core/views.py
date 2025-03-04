@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.db.models import F
 from .models import *
@@ -7,23 +7,25 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 import json
 import random
 
-def login(request):
+def login_view(request):
+    form = AuthenticationForm(request, data=request.POST)
     if request.method != "POST":
         return render(request, "core/login.html")
     else:
-        username = request.POST["username"]
+        email = request.POST["email"]
         password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+        user = authenticate(request, username=email, password=password)
+        if user:
             login(request, user)
             return HttpResponseRedirect(reverse("core:home"))
         else:
             return render(request,
                          "core/login.html",
-                         {"error_message": "Invalid details: please try again"})
+                         {"form": form})
 
 def signup(request):
     # if no POST, display sign up page
@@ -40,10 +42,13 @@ def signup(request):
         password = request.POST['password']
 
         # perhaps implement minimum length of password later??
+    
+        if CustomUser.objects.filter(email=email).exists():
+            return render(request, 'core/signup.html', {"error_message": "Email already in use"})
 
         try:
             # create user
-            user = User.objects.create_user(
+            user = CustomUser.objects.create_user(
             username=username, 
             email=email, 
             first_name=first_name, 
@@ -64,18 +69,11 @@ def signup(request):
             
             if authenticated_user:
                 login(request, authenticated_user)
-
-            # redirect to home page
-            # this may need changing, will be able to test once there is a home page
             return HttpResponseRedirect('/home/')
         
-        # catch if username not unique
-        except IntegrityError as e:
-            error_message = "Username taken. Please enter a different username"
-            
-            # display signup page with error message
-            return render(request, 'core/signup.html',
-                          {"error_message": error_message})
+        except IntegrityError:
+            return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
+        
 
 def home(request):
     if (request.user.is_authenticated):
@@ -85,6 +83,9 @@ def home(request):
         
 def quiz(request):
     return render(request, 'core/quiz.html')
+
+def profile_view(request):
+    return render(request, 'core/profile.html')
     
 # View to fetch all questions from the database
 def fetch_questions(request):

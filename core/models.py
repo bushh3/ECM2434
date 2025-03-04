@@ -1,12 +1,20 @@
 from django.db import models
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    # username = models.CharField(max_length=50, unique=True)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.email
 
 class Player(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
 
 class Quiz(models.Model):

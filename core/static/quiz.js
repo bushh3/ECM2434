@@ -15,6 +15,5 @@ document.addEventListener("DOMContentLoaded", function() {
     // quizpage->navpage
     document.getElementById("back").addEventListener("click", function() {
         console.log("BACK button clicked");  // Debugging: Verify the event listener
-        window.history.back();
     });
 });

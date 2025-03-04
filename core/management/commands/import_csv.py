@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand
-from core.models import Quiz, Question  # 确保引用正确的模型
+from core.models import Quiz, Question
 
 class Command(BaseCommand):
     help = 'Import quiz questions from CSV file'
