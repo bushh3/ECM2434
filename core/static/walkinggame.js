@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
         SAVE_TRIP: '/save/',
         GET_TRIPS: '/history/',
         DELETE_TRIP: '/delete/',
-        GET_USER_INFO: '/user/info/'
     };
 
     // CSRF
@@ -152,77 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
    
-    /**
-     * display history
-     * @param {Array} history 
-     */
-    function displayHistory(history) {
-        const historyList = document.getElementById('historyList');
-        historyList.innerHTML = '';
-        
-        if (!history || history.length === 0) {
-            historyList.innerHTML = '<div class="no-records">No travel records yet. Start your green travel journey!</div>';
-            return;
-        }
-        
-        history.forEach(record => {
-            const item = {
-                id: record.id || record.session_id,
-                date: record.date || record.created_at,
-                distance: record.distance,
-                duration: record.duration_display || record.duration,
-                isCompleted: record.is_completed,
-                pointsEarned: record.points_earned
-            };
-            
-            const date = new Date(item.date);
-            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-            
-            const historyItem = document.createElement('div');
-            historyItem.className = `history-item ${item.isCompleted ? 'success' : 'incomplete'}`;
-            
-            historyItem.innerHTML = `
-                <div class="history-date">
-                    ${formattedDate}
-                    <span class="history-status ${item.isCompleted ? 'status-complete' : 'status-incomplete'}">
-                        ${item.isCompleted ? 'Completed' : 'Incomplete'}
-                    </span>
-                </div>
-                <div class="history-stats">
-                    <div class="history-stat">
-                        <div class="history-stat-value">${item.distance} km</div>
-                        <div class="history-stat-label">Distance</div>
-                    </div>
-                    <div class="history-stat">
-                        <div class="history-stat-value">${item.duration}</div>
-                        <div class="history-stat-label">Duration</div>
-                    </div>
-                    <div class="history-stat">
-                        <div class="history-stat-value">${item.pointsEarned}</div>
-                        <div class="history-stat-label">Points</div>
-                    </div>
-                </div>
-                <div class="history-actions">
-                    <button class="history-btn delete-btn" data-id="${item.id}">
-                        <i class="fas fa-trash-alt"></i> Delete
-                    </button>
-                </div>
-            `;
-            
-            const deleteBtn = historyItem.querySelector('.delete-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', async function() {
-                    const success = await deleteTripFromBackend(item.id);
-                    if (success) {
-                        updateHistoryUI();
-                    }
-                });
-            }
-            
-            historyList.appendChild(historyItem);
-        });
-    }
-    
+
 
 
 
