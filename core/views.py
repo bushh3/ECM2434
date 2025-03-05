@@ -38,7 +38,7 @@ def signup(request):
         password = request.POST['password']
 
         if CustomUser.objects.filter(email=email).exists():
-            return render(request, 'core/signup.html', {"error_message": "email already in use"})
+            return render(request, 'core/signup.html', {"error_message": "Email already in use"})
 
         try:
             user = CustomUser.objects.create_user(
@@ -56,7 +56,7 @@ def signup(request):
             return HttpResponseRedirect('/home/')
         
         except IntegrityError:
-            return render(request, 'core/signup.html', {"error_message": "an error occurred, please try again"})
+            return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
 
 # home view
 def home(request):
@@ -73,7 +73,7 @@ def profile_view(request):
 @login_required
 def start_walking(request):
     player = request.user.player
-    session_id = generate_session_id()  # implement this function to generate a unique session id
+    session_id = 'session_' + str(timezone.now().timestamp())  # Generate a unique session ID
     start_time = timezone.now()
 
     trip = WalkingTrip.objects.create(
@@ -150,10 +150,86 @@ def delete_trip(request):
 
 # function to calculate points based on distance
 def calculate_points(distance):
-    # points logic, e.g., 1 point for each km
-    return int(distance)
+    return int(distance)  # 1 point per km
 
 # function to calculate walking speed
 def calculate_speed(lat, lng):
-    # logic to calculate speed (in km/h) based on GPS data
-    return 5  # return a fixed value for example, but you can calculate real speed
+    return 5  # Placeholder, can be adjusted based on GPS data for actual speed
+
+# quiz view (added this for your requirement)
+def quiz(request):
+    # Return the quiz page, or dynamically load questions if needed
+    return render(request, 'core/quiz.html')
+
+# view to fetch quiz questions (not used in original, but added for clarity)
+def fetch_questions(request):
+    questions = list(Question.objects.all()) 
+    selected_questions = random.sample(questions, min(5, len(questions)))
+
+    session_data = {
+        str(index + 1): {
+            'id': question.id,
+            'correct_option': question.correct_option
+        }
+        for index, question in enumerate(selected_questions)
+    }
+
+    request.session['current_questions'] = session_data
+    request.session.modified = True
+
+    return render(request, 'core/questions.html', {'questions': selected_questions})
+
+# view to check the user's answer for a specific question
+@login_required
+def check_answer(request):
+    if request.method == "POST":
+        session_questions = request.session.get('current_questions', {})
+        total_questions = len(session_questions)
+        score_per_question = 5
+        
+        correct = 0
+        wrong = 0
+
+        for key, user_answer in request.POST.items():
+            if key.startswith('question_'):
+                question_index = key.split('_')[1]
+                correct_option = session_questions.get(question_index, {}).get('correct_option')
+                if correct_option and user_answer == correct_option:
+                    correct += 1
+                else:
+                    wrong += 1
+        
+        current_score = correct * score_per_question
+        player = request.user.player
+        player.points += current_score
+        player.save()
+
+        request.session['quiz_result'] = {
+            'correct': correct,
+            'wrong': wrong,
+            'current_score': current_score,
+            'total_score': player.points
+        }
+        request.session.modified = True
+
+        return HttpResponseRedirect(reverse('core:get_quiz_results'))
+
+# view to get the quiz results
+@login_required
+def get_quiz_results(request):
+    player = request.user.player
+    quiz_result = request.session.get('quiz_result', {
+        'correct': 0,
+        'wrong': 0,
+        'current_score': 0,
+        'total_score': player.points
+    })
+
+    correct = quiz_result['correct']
+    wrong = quiz_result['wrong']
+    current_score = quiz_result['current_score']
+    total_score = quiz_result['total_score']
+    
+    result_text = f"Correct: {correct}, Wrong: {wrong}, Score this time: {current_score}, Total score: {total_score}"
+    
+    return render(request, 'core/result.html', {'result_text': result_text})
