@@ -23,7 +23,7 @@ items.forEach((item) => {
 //-------------------------------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
     // Retrieve user profile picture and obtain the latest profile picture from the backend -- 获取用户头像，从后端获取最新头像，前后端连接
-    fetch('/api/user/avatar', {
+    fetch('/api/user/get-avatar', {
         method: 'GET',
         headers: {
             "Content-Type": "application/json"
