@@ -1,5 +1,5 @@
-from django.contrib import admin  # 导入 admin 模块
-from django.urls import path, include  # 导入 include 来包含 quiz 应用的 URL
+from django.contrib import admin
+from django.urls import path, include
 from django.shortcuts import redirect
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
@@ -16,6 +16,9 @@ urlpatterns = [
     path('check-answer/', views.check_answer, name="check_answer"),  # check answer
     path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('profile/', views.profile_view, name="profile"),
+    path('walkinggame/start/', views.start_walking, name="start_walking"),
+    path('walkinggame/save/', views.save_trip_data, name="save_trip_data"),
+    path('walkinggame/history/', views.get_walk_history, name="get_walk_history"),
+    path('walkinggame/delete/', views.delete_trip, name="delete_trip"),
     path('admin/', admin.site.urls),
 ]
-
