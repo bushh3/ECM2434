@@ -43,7 +43,7 @@ function uploadAvatar(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const newAvatarUrl = data.avatarUrl;
+            const newAvatarUrl = data.avatar_url ? data.avatar_url : "/media/avatars/fox.jpg";
             document.getElementById('current-avatar').src = newAvatarUrl;
             document.getElementById("modal-avatar").src = newAvatarUrl;
             closeModal();
@@ -86,11 +86,40 @@ function showPopup(message = "Success!") {
 //Get username at the greeting area
 // 打招呼处获取用户名------------------------------------------------------------------------------需要获取数据库用户名
 window.addEventListener("DOMContentLoaded", function() {
-    var dbUsername = "Alice"; // -----------Replace with the username returned by the backend - 替换为后端返回的用户名
-    const displayUsername = document.getElementById('display-username');
-    if (displayUsername) {
-      displayUsername.textContent = dbUsername;
-    }
+    fetch('/api/user/profile', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch user profile');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const displayUsername = document.getElementById('display-username');
+            if (displayUsername) {
+                displayUsername.textContent = data.username; //更新用户名 Update the username
+            }
+            const avatarImg = document.getElementById('current-avatar'); //更新头像 Update the avatar
+            if (avatarImg) {
+                let avatarPath = data.avatar_url && data.avatar_url !== "undefined" ? data.avatar_url : "/media/avatars/fox.jpg";
+                avatarImg.src = avatarPath;
+            }
+
+            document.getElementById('username').value = data.username; //填充个人信息 Fill in personal information
+            document.getElementById('email').value = data.email;
+            document.getElementById('firstName').value = data.first_name;
+            document.getElementById('lastName').value = data.last_name;
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching user profile:", error);
+    });
 });
 
 
@@ -110,7 +139,52 @@ function toggleEdit(fieldId, btn) {
         inputField.style.backgroundColor = "#eee";
         inputField.style.border = "1px solid #ccc";
         const updatedValue = inputField.value;
-        console.log(`保存 ${fieldId}: ${updatedValue}`);
+        const csrfToken = getCookie('csrftoken');
+
+        // 发送 PUT 请求更新用户信息
+        const updatedData = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value
+        };
+
+        fetch('/api/user/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": csrfToken
+            },
+            credentials: 'include',
+            body: JSON.stringify(updatedData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPopup("Profile updated successfully.");
+
+                if (data.email_changed) {
+                    showPopup("Email changed, please log in again.");
+                    setTimeout(() => {
+                        fetch('/api/logout', { method: 'POST', credentials: 'include' })
+                        .then(() => {
+                            window.location.href = "/login/";
+                        });
+                    }, 2000);
+                }
+
+            } else {
+                if (data.error === "This email is already in use.") {
+                    showPopup("This email is already registered. Please use another email.");
+                } else {
+                    showPopup("Failed to update profile.");
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error updating profile:", error);
+            showPopup("An error occurred. Please try again later.");
+        });
         btn.innerHTML = `<i class="fa fa-pencil-square-o"></i>`;
     }
 }
@@ -122,6 +196,7 @@ function changePassword() {
     showCustomConfirm(
         "Do you want to set new password? ",
         function() {
+            window.location.href = "/set_new_password/";
             //Add the logic for changing passwords here, need to build a new page of set new password
             // 这里添加修改密码的逻辑，要建一新页面
         },

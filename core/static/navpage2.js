@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            let avatarUrl = data.avatarUrl;
-            let avatarImg = document.querySelector(".avatar-link img");
+            let avatarUrl = data.avatar_url ? data.avatar_url : "/media/avatars/fox.jpg";
+            let avatarImg = document.querySelector(".avatar-frame img");
             if (avatarImg) {
                 avatarImg.src = avatarUrl;
             }
