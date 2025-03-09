@@ -208,7 +208,33 @@ function logout() {
     showCustomConfirm(
         "Are you sure to log out of the account? ",
         function() {
-            window.location.href = "/login/";
+            const csrfToken = getCookie('csrftoken');
+
+            fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.cookie = "sessionid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+                    document.cookie = "csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+                    showPopup("Logged out successfully.");
+                    setTimeout(() => {
+                        window.location.href = "/login/";
+                    }, 1000);
+                } else {
+                    showPopup("Logout failed. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error("Error logging out:", error);
+                showPopup("An error occurred while logging out.");
+            });
         },
         function() {}
     );

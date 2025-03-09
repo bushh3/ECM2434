@@ -309,6 +309,11 @@ def logout_view(request): # 登出 Logout
     if request.method == "POST":
 
         logout(request)
-        return JsonResponse({"success": True, "message": "Logged out successfully"}, content_type="application/json")
+
+        request.session.flush()
+        response = JsonResponse({"success": True, "message": "Logged out successfully"}, content_type="application/json")
+        response.delete_cookie("sessionid")
+        response.delete_cookie("csrftoken")
+        return response
     
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")  
