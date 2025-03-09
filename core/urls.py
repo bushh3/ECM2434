@@ -5,14 +5,19 @@ from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from .forms import EmailBasedPasswordResetForm
+from .views import CustomPasswordResetView, CustomPasswordResetConfirmView
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from . import views
 
 app_name = "core"
 urlpatterns = [
     path('', views.home, name="home"),
     path('login/', views.login_view, name="login"),
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name="password_reset"), #这是Django自带的需要邮件验证的
-    path('set_new_password/', views.set_new_password, name="set_new_password"), #这需要我们自己创建的
+    path('password_reset/', CustomPasswordResetView.as_view(), name="password_reset"),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('signup/', views.signup, name="signup"),
     path('quiz/', views.quiz, name="quiz"),
     path('questions/', views.fetch_questions, name="fetch_questions"),  # get question
@@ -25,7 +30,8 @@ urlpatterns = [
     path('api/user/get-avatar', views.get_avatar, name="get_avatar"),
     path('api/user/delete', views.delete_account, name="delete_account"),
     path('api/user/update', views.update_user_profile, name="update_user_profile"),
-    path('api/user/change-password', views.change_password, name="change_password"),
+    path('accounts/password_change/', PasswordChangeView.as_view(template_name='registration/password_change_form.html', success_url='/accounts/password_change/done/'), name='password_change'),
+    path('accounts/password_change/done/', PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),
     path('api/logout', views.logout_view, name="logout"),
 ]
 

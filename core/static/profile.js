@@ -196,9 +196,7 @@ function changePassword() {
     showCustomConfirm(
         "Do you want to set new password? ",
         function() {
-            window.location.href = "/set_new_password/";
-            //Add the logic for changing passwords here, need to build a new page of set new password
-            // 这里添加修改密码的逻辑，要建一新页面
+            window.location.href = "/accounts/password_change/";
         },
         function() {}
     );

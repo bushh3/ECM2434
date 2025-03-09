@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy, get_resolver
 from django.db.models import F
 from .models import *
 from django.contrib.auth.models import User
@@ -8,6 +8,11 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import views as auth_views
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -18,6 +23,33 @@ from django.core.exceptions import ValidationError
 import json
 import random
 import os
+
+class CustomPasswordResetView(auth_views.PasswordResetView):
+    def form_valid(self, form):
+        users = list(form.get_users(form.cleaned_data["email"]))
+        if not users:
+            return super().form_invalid(form)
+
+        user = users[0]
+        uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+        token = default_token_generator.make_token(user)
+
+        reset_url = self.request.build_absolute_uri(
+            reverse('core:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+        )
+
+        form.save(
+            request=self.request,
+            use_https=self.request.is_secure(),
+            email_template_name='registration/password_reset_email.html',
+            subject_template_name='registration/password_reset_subject.txt',
+            token_generator=default_token_generator,
+            extra_email_context={'password_reset_confirm_url': reset_url},
+        )
+        return super().form_valid(form)
+    
+class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    success_url = reverse_lazy('core:password_reset_complete')
 
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST)
