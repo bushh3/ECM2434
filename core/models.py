@@ -1,12 +1,10 @@
 from django.db import models
-
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    # username = models.CharField(max_length=50, unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -62,7 +60,13 @@ class PlayerBadge(models.Model):
 class WalkingData(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
-    distance = models.FloatField()
+    distance = models.FloatField()  # in kilometers
+    is_completed = models.BooleanField(default=False)
+    points_earned = models.IntegerField(default=0)
+    track_points = models.JSONField()  # store GPS coordinates (lat, lon) and timestamps
+    
+    def __str__(self):
+        return f"Walking data for {self.player.user.username} on {self.timestamp}"
 
 class DIYCreation(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -74,3 +78,17 @@ class DIYCreation(models.Model):
 class Like(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     creation = models.ForeignKey(DIYCreation, on_delete=models.CASCADE)
+
+class WalkingChallenge(models.Model):
+    user = models.ForeignKey('Player', on_delete=models.CASCADE)
+    session_id = models.CharField(max_length=100)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    distance = models.FloatField()
+    duration = models.IntegerField()  # Duration in seconds
+    is_completed = models.BooleanField(default=False)
+    points_earned = models.IntegerField(default=0)
+    track_points = models.JSONField()  # Store the GPS points (list of lat/lng)
+
+    def __str__(self):
+        return f"Challenge {self.session_id} for {self.user.username}"

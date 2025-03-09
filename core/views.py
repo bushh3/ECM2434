@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 import json
 import random
+from .models import WalkingChallenge
+from django.utils import timezone
 
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST)
@@ -173,3 +175,81 @@ def get_quiz_results(request):
     result_text = f"{correct}|{wrong}|{current_score}|{total_score}"
     
     return render(request, 'core/result.html', {'result_text': result_text})  
+
+def walking_game(request):
+    return render(request, 'core/walkinggame.html')
+
+def save_trip(request):
+    if request.method == 'POST':
+        session_id = request.POST.get('session_id')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        distance = request.POST.get('distance')
+        duration = request.POST.get('duration')
+        is_completed = request.POST.get('is_completed') == 'true'
+        points_earned = 30 if is_completed else 0
+        track_points = []
+
+        # Collecting track points from the POST request
+        for i in range(int(request.POST.get('track_points_count'))):
+            lat = request.POST.get(f'point_lat_{i}')
+            lng = request.POST.get(f'point_lng_{i}')
+            timestamp = request.POST.get(f'point_time_{i}')
+            track_points.append({
+                'lat': lat,
+                'lng': lng,
+                'timestamp': timestamp,
+            })
+
+        user = request.user
+        # Create or update the walking challenge
+        challenge, created = WalkingChallenge.objects.update_or_create(
+            session_id=session_id,
+            user=user,
+            defaults={
+                'start_time': start_time,
+                'end_time': end_time,
+                'distance': distance,
+                'duration': duration,
+                'is_completed': is_completed,
+                'points_earned': points_earned,
+                'track_points': track_points,
+            }
+        )
+
+        return HttpResponse('Trip data saved successfully.', status=200)
+    return HttpResponse('Invalid request.', status=400)
+
+def get_trip_history(request):
+    user = request.user
+    trips = WalkingChallenge.objects.filter(user=user).order_by('-start_time')
+
+    history = []
+    for trip in trips:
+        history.append({
+            'session_id': trip.session_id,
+            'start_time': trip.start_time,
+            'end_time': trip.end_time,
+            'distance': trip.distance,
+            'duration': trip.duration,
+            'is_completed': trip.is_completed,
+            'points_earned': trip.points_earned,
+            'track_points': trip.track_points,
+        })
+
+    history_html = ""
+    for trip in history:
+        history_html += f"<div>Session: {trip['session_id']} - Distance: {trip['distance']} km - Points: {trip['points_earned']}</div>"
+    
+    return HttpResponse(history_html, status=200)
+
+def delete_trip(request):
+    if request.method == 'POST':
+        trip_id = request.POST.get('trip_id')
+        try:
+            trip = WalkingChallenge.objects.get(id=trip_id, user=request.user)
+            trip.delete()
+            return HttpResponse('Record deleted successfully.', status=200)
+        except WalkingChallenge.DoesNotExist:
+            return HttpResponse('Record not found.', status=404)
+    return HttpResponse('Invalid request.', status=400)
