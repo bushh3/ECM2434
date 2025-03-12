@@ -86,6 +86,10 @@ def quiz(request):
 
 def profile_view(request):
     return render(request, 'core/profile.html')
+
+def leaderboard_view(request):
+    return render(request, 'core/leaderboard.html')
+
     
 # View to fetch all questions from the database
 def fetch_questions(request):

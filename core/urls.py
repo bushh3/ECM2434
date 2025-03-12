@@ -16,6 +16,7 @@ urlpatterns = [
     path('check-answer/', views.check_answer, name="check_answer"),  # check answer
     path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('profile/', views.profile_view, name="profile"),
+    path('leaderboard/', views.leaderboard_view, name="leaderboard"),
     path('admin/', admin.site.urls),
 ]
 
