@@ -3,6 +3,9 @@ from django.urls import path, include  # 导入 include 来包含 quiz 应用的
 from django.shortcuts import redirect
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
+from .views import get_user_info, scan_qr_code
 from . import views
 
 app_name = "core"
@@ -17,5 +20,10 @@ urlpatterns = [
     path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('profile/', views.profile_view, name="profile"),
     path('admin/', admin.site.urls),
+    path('recycling/', views.recycling_view, name='recycling'),
+    path('recycling/user/info/', views.get_user_info, name='get_user_info'),
+    path('recycling/scan/', views.scan_qr_code, name='scan_qr_code'),
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch user data from the server
     async function fetchUserData() {
         try {
-            const response = await fetch(API_BASE_URL + API_ENDPOINTS.GET_USER_INFO);
+            const response = await fetch('/recycling/user/info/');
             if (response.ok) {
                 // Parse response text into key-value pairs
                 const responseText = await response.text();
@@ -72,17 +72,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    let isProcessingQR = false;
     // Process scanned QR code with backend
     async function processQRCode(qrData) {
         console.log("Processing QR data: ", qrData);
+
+        if (isProcessingQR) return;
+        isProcessingQR = true;
         
         try {
             const formData = new FormData();
             formData.append('qrCode', qrData);
             
-            const response = await fetch(API_BASE_URL + API_ENDPOINTS.SCAN_QR, {
+            const response = await fetch('/recycling/scan/', {
                 method: 'POST',
-                body: formData
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `qrCode=${encodeURIComponent(qrData)}`
             });
             
             if (!response.ok) {
@@ -119,6 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error("Error processing QR code with backend:", error);
             showInvalidQR();
+        } finally {
+            isProcessingQR = false;
         }
     }
     // *************** PART2 Camera and QR Code Scanning  ********************
@@ -216,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 canvasContext.drawImage(videoElement, 0, 0, width, height);
                 
-                const imageData = canvasContext.getImageData(0, 0, width, height);
+                const imageData = canvasContext.getImageData(0, 0, width, height, { willReadFrequently: true });
                 
                 try {
                     // Use jsQR library (if loaded) to decode QR code

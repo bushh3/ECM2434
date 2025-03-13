@@ -1,6 +1,8 @@
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
+from django.conf import settings
 
 # Create your models here.
 
@@ -40,6 +42,26 @@ class PlayerQuiz(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     timestamp = models.DateTimeField()
+
+class RecyclingBin(models.Model):
+    location_name = models.CharField(max_length=255)
+    qr_code = models.CharField(max_length=255, unique=True)
+    qr_code_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.location_name} - {self.qr_code}"
+
+class ScanRecord(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    qr_code = models.CharField(max_length=255)
+    scan_date = models.DateField(default=now)
+
+    class Meta:
+        unique_together = ('user', 'scan_date')  # 限制用户每天只能扫码一次
+
+    def __str__(self):
+        return f"{self.user.email} - {self.qr_code} ({self.scan_date})"
 
 class Task(models.Model):
     name = models.CharField(max_length=100)
