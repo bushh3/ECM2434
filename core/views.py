@@ -208,14 +208,14 @@ def scan_qr_code(request):
     if not qr_code:
         return HttpResponse("status=invalid&message=Invalid QR code. Please try again.", content_type="text/plain")
 
-    # 检查二维码是否在数据库中
+    # check if it is the QR code in the database
     if not RecyclingBin.objects.filter(qr_code=qr_code).exists():
         return HttpResponse("status=invalid&message=Invalid QR code. Please try again.", content_type="text/plain")
     
     if ScanRecord.objects.filter(user=user, scan_date=today).exists():
         return HttpResponse("status=already_scanned_today&message=Task completed. Please come back tomorrow.", content_type="text/plain")
 
-    # 记录扫码信息
+    # record the scanning information
     try:
         ScanRecord.objects.create(user=user, scan_date=today, qr_code=qr_code)
     except Exception as e:
