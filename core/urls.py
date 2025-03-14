@@ -18,8 +18,7 @@ urlpatterns = [
     path('profile/', views.profile_view, name="profile"),
     path('admin/', admin.site.urls),
     path('walkinggame/', views.walking_game, name="walkinggame"),
-    path('walkinggame/save/', views.save_trip, name="save_trip"),  # Save trip data
-    path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),  # Get trip history
-    path('walkinggame/delete/', views.delete_trip, name="delete_trip"),
+    path('walkinggame/save/', views.save_trip, name="save_trip"),
+    path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),
 ]
 

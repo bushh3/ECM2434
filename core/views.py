@@ -232,7 +232,7 @@ def get_trip_history(request):
     player = request.user.player
     trips = WalkingChallenge.objects.filter(player=player).order_by('-start_time')
 
-    history_html = '<h2 class="history-title">Your Travel History</h2><div class="history-list">'
+    history_html = '<h2 class="history-title">Activity History</h2><div class="history-list">'
 
     if trips.exists():
         for trip in trips:
@@ -266,11 +266,6 @@ def get_trip_history(request):
                             <span class="history-stat-label">Points</span>
                         </div>
                     </div>
-                    <div class="history-actions">
-                        <button class="history-btn" onclick="deleteRecord('{trip.session_id}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
                 </div>
             """
     else:
@@ -279,15 +274,4 @@ def get_trip_history(request):
     history_html += '</div>'
     return HttpResponse(history_html, status=200)
 
-@login_required
-def delete_trip(request):
-    if request.method == 'POST':
-        trip_id = request.POST.get('trip_id')
-        try:
-            trip = WalkingChallenge.objects.get(id=trip_id, player=request.user.player)
-            trip.delete()
-            return HttpResponse('Record deleted successfully.', status=200)
-        except WalkingChallenge.DoesNotExist:
-            return HttpResponse('Record not found.', status=404)
-    return HttpResponse('Invalid request.', status=400)
 
