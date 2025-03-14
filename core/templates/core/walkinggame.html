@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'walkinggame.css' %}">
 </head>
 <body>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
     <div class="container">
         <!-- Map container placed at top -->
         <div class="map-container">

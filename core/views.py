@@ -8,10 +8,9 @@ from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils import timezone
 import json
 import random
-from .models import WalkingChallenge
-from django.utils import timezone
 
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST)
@@ -174,11 +173,13 @@ def get_quiz_results(request):
     
     result_text = f"{correct}|{wrong}|{current_score}|{total_score}"
     
-    return render(request, 'core/result.html', {'result_text': result_text})  
+    return render(request, 'core/result.html', {'result_text': result_text})
 
+@login_required
 def walking_game(request):
     return render(request, 'core/walkinggame.html')
 
+@login_required
 def save_trip(request):
     if request.method == 'POST':
         session_id = request.POST.get('session_id')
@@ -188,24 +189,24 @@ def save_trip(request):
         duration = request.POST.get('duration')
         is_completed = request.POST.get('is_completed') == 'true'
         points_earned = 30 if is_completed else 0
+
         track_points = []
+        track_points_count = int(request.POST.get('track_points_count', 0))
 
         # Collecting track points from the POST request
-        for i in range(int(request.POST.get('track_points_count'))):
-            lat = request.POST.get(f'point_lat_{i}')
-            lng = request.POST.get(f'point_lng_{i}')
-            timestamp = request.POST.get(f'point_time_{i}')
-            track_points.append({
-                'lat': lat,
-                'lng': lng,
-                'timestamp': timestamp,
-            })
+        for i in range(track_points_count):
+                lat = request.POST.get(f'point_lat_{i}')
+                lon = request.POST.get(f'point_lng_{i}')
+                timestamp = request.POST.get(f'point_time_{i}')
+                if lat and lon and timestamp:
+                    track_points.append({"lat": lat, "lon": lon, "timestamp": timestamp})
 
-        user = request.user
+        track_points_json = json.dumps(track_points)
+        player = request.user.player
         # Create or update the walking challenge
         challenge, created = WalkingChallenge.objects.update_or_create(
             session_id=session_id,
-            user=user,
+            player=player,
             defaults={
                 'start_time': start_time,
                 'end_time': end_time,
@@ -213,43 +214,80 @@ def save_trip(request):
                 'duration': duration,
                 'is_completed': is_completed,
                 'points_earned': points_earned,
-                'track_points': track_points,
+                'track_points': track_points_json,
             }
         )
 
-        return HttpResponse('Trip data saved successfully.', status=200)
-    return HttpResponse('Invalid request.', status=400)
+        player.points += points_earned
+        player.save()
 
+        return JsonResponse({'message': 'Trip data saved successfully.', 'status': 200})
+
+    return JsonResponse({'error': 'Invalid request.', 'status': 400}, status=400)
+
+@login_required
 def get_trip_history(request):
-    user = request.user
-    trips = WalkingChallenge.objects.filter(user=user).order_by('-start_time')
+    if not hasattr(request.user, 'player'):
+        Player.objects.create(user=request.user, points=0)
+    player = request.user.player
+    trips = WalkingChallenge.objects.filter(player=player).order_by('-start_time')
 
-    history = []
-    for trip in trips:
-        history.append({
-            'session_id': trip.session_id,
-            'start_time': trip.start_time,
-            'end_time': trip.end_time,
-            'distance': trip.distance,
-            'duration': trip.duration,
-            'is_completed': trip.is_completed,
-            'points_earned': trip.points_earned,
-            'track_points': trip.track_points,
-        })
+    history_html = '<h2 class="history-title">Your Travel History</h2><div class="history-list">'
 
-    history_html = ""
-    for trip in history:
-        history_html += f"<div>Session: {trip['session_id']} - Distance: {trip['distance']} km - Points: {trip['points_earned']}</div>"
-    
+    if trips.exists():
+        for trip in trips:
+            status_class = "status-complete" if trip.is_completed else "status-incomplete"
+            item_class = "history-item success" if trip.is_completed else "history-item incomplete"
+            status_text = "Completed" if trip.is_completed else "Incomplete"
+            points_text = f"{trip.points_earned} Points" if trip.is_completed else "No Points"
+
+            duration_seconds = trip.duration // 1000 if trip.duration > 3600 else trip.duration
+            minutes = duration_seconds // 60
+            seconds = duration_seconds % 60
+            duration_text = f"{minutes} min {seconds} sec"
+
+            history_html += f"""
+                <div class="{item_class}">
+                    <div class="history-meta">
+                        <span class="history-time">{trip.start_time.strftime('%Y-%m-%d %H:%M:%S')}</span>
+                        <span class="history-status {status_class}">{status_text}</span>
+                    </div>
+                    <div class="history-stats">
+                        <div class="history-stat">
+                            <span class="history-stat-value">{trip.distance:.1f} km</span>
+                            <span class="history-stat-label">Distance</span>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-stat-value">{duration_text}</span>
+                            <span class="history-stat-label">Duration</span>
+                        </div>
+                        <div class="history-stat">
+                            <span class="history-stat-value">{points_text}</span>
+                            <span class="history-stat-label">Points</span>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="history-btn" onclick="deleteRecord('{trip.session_id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            """
+    else:
+        history_html += '<div class="no-records">No travel records yet. Start your green travel journey!</div>'
+
+    history_html += '</div>'
     return HttpResponse(history_html, status=200)
 
+@login_required
 def delete_trip(request):
     if request.method == 'POST':
         trip_id = request.POST.get('trip_id')
         try:
-            trip = WalkingChallenge.objects.get(id=trip_id, user=request.user)
+            trip = WalkingChallenge.objects.get(id=trip_id, player=request.user.player)
             trip.delete()
             return HttpResponse('Record deleted successfully.', status=200)
         except WalkingChallenge.DoesNotExist:
             return HttpResponse('Record not found.', status=404)
     return HttpResponse('Invalid request.', status=400)
+

@@ -1,10 +1,14 @@
 from django.db import models
+
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
+    # username = models.CharField(max_length=50, unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -14,6 +18,14 @@ class CustomUser(AbstractUser):
 class Player(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.email
+    
+@receiver(post_save, sender=CustomUser)
+def create_player_for_new_user(sender, instance, created, **kwargs):
+    if created and not hasattr(instance, 'player'):
+        Player.objects.create(user=instance)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
@@ -60,13 +72,7 @@ class PlayerBadge(models.Model):
 class WalkingData(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
-    distance = models.FloatField()  # in kilometers
-    is_completed = models.BooleanField(default=False)
-    points_earned = models.IntegerField(default=0)
-    track_points = models.JSONField()  # store GPS coordinates (lat, lon) and timestamps
-    
-    def __str__(self):
-        return f"Walking data for {self.player.user.username} on {self.timestamp}"
+    distance = models.FloatField()
 
 class DIYCreation(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -80,15 +86,24 @@ class Like(models.Model):
     creation = models.ForeignKey(DIYCreation, on_delete=models.CASCADE)
 
 class WalkingChallenge(models.Model):
-    user = models.ForeignKey('Player', on_delete=models.CASCADE)
+    player = models.ForeignKey('Player', on_delete=models.CASCADE)
     session_id = models.CharField(max_length=100)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     distance = models.FloatField()
-    duration = models.IntegerField()  # Duration in seconds
+    duration = models.IntegerField()
     is_completed = models.BooleanField(default=False)
     points_earned = models.IntegerField(default=0)
-    track_points = models.JSONField()  # Store the GPS points (list of lat/lng)
+    track_points = models.TextField(default="")  
+
+    def set_track_points(self, points_list):
+        formatted_points = ";".join([f"{point['lat']},{point['lon']}" for point in points_list])
+        self.track_points = formatted_points
+
+    def get_track_points(self):
+        if not self.track_points:
+            return []
+        return [{"lat": float(lat), "lon": float(lon)} for lat, lon in (point.split(",") for point in self.track_points.split(";"))]
 
     def __str__(self):
-        return f"Challenge {self.session_id} for {self.user.username}"
+        return f"Challenge {self.session_id} for {self.player.user.email}"
