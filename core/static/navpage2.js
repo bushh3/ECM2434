@@ -42,6 +42,28 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(err => {
         console.error("Failed to fetch avatar:", err);
     });
+    
+    fetch('/api/user/get-score', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let scoreElement = document.getElementById("user-score");
+            if (scoreElement) {
+                scoreElement.textContent = data.score;
+            }
+        } else {
+            console.error("Failed to fetch score:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching score:", err);
+    });
+
     // --------------------------------------------------------------------------------------------------
 
     // popup keep close when do not need them

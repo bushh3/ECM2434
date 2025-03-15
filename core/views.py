@@ -123,6 +123,15 @@ def home(request):
         return render(request, 'core/navpage2.html')
     else:
         return HttpResponseRedirect('/login/')
+
+@login_required
+def get_user_score(request):
+    user = request.user
+    try:
+        player = Player.objects.get(user=user)
+        return JsonResponse({"success": True, "score": player.points})
+    except Player.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Player profile not found"}, status=404)
         
 def quiz(request):
     return render(request, 'core/quiz.html')

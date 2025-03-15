@@ -20,6 +20,14 @@ class Player(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.user.email
+    
+@receiver(post_save, sender=CustomUser)
+def create_player_for_new_user(sender, instance, created, **kwargs):
+    if created and not hasattr(instance, 'player'):
+        Player.objects.create(user=instance)
+
 class Profile(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE, related_name="profile")
     avatar_url = models.CharField(max_length=255, blank=True, null=True, default="avatars/fox.jpg")
@@ -86,10 +94,7 @@ class Like(models.Model):
     creation = models.ForeignKey(DIYCreation, on_delete=models.CASCADE)
 
 @receiver(post_save, sender=CustomUser)
-def create_user_profile(sender, instance, created, **kwargs):
+def create_related_objects(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)  # 自动生成 Profile
-
-@receiver(post_save, sender=CustomUser)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+        Profile.objects.get_or_create(user=instance)
+        Player.objects.get_or_create(user=instance)
