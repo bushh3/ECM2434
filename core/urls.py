@@ -3,6 +3,8 @@ from django.urls import path, include  # 导入 include 来包含 quiz 应用的
 from django.shortcuts import redirect
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 
 app_name = "core"
@@ -11,12 +13,20 @@ urlpatterns = [
     path('login/', views.login_view, name="login"),
     path('password_reset/', auth_views.PasswordResetView.as_view(), name="password_reset"),
     path('signup/', views.signup, name="signup"),
+    path('leaderboard/api/user_rank/', views.get_user_rank, name="user_rank"),
     path('quiz/', views.quiz, name="quiz"),
     path('questions/', views.fetch_questions, name="fetch_questions"),  # get question
     path('check-answer/', views.check_answer, name="check_answer"),  # check answer
     path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('profile/', views.profile_view, name="profile"),
     path('leaderboard/', views.leaderboard_view, name="leaderboard"),
+<<<<<<< Updated upstream
+=======
+    path('leaderboard/api/rankings/', views.get_leaderboard, name='leaderboard_api'),
+>>>>>>> Stashed changes
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

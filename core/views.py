@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 import json
 import random
 
@@ -80,6 +82,18 @@ def home(request):
         return render(request, 'core/navpage2.html')
     else:
         return HttpResponseRedirect('/login/')
+    
+@login_required
+def get_user_rank(request):
+    players = Player.objects.order_by('-points')
+    user_rank = None
+
+    for index, player in enumerate(players):
+        if player.user == request.user:
+            user_rank = index + 1
+            break
+
+    return JsonResponse({"success": True, "rank": user_rank})
         
 def quiz(request):
     return render(request, 'core/quiz.html')
@@ -90,6 +104,32 @@ def profile_view(request):
 def leaderboard_view(request):
     return render(request, 'core/leaderboard.html')
 
+<<<<<<< Updated upstream
+=======
+@login_required
+def get_leaderboard(request):
+    players = (
+        Player.objects
+        .select_related('user__profile')
+        .annotate(username=F('user__username'), avatar=F('user__profile__avatar_url'))
+        .order_by('-points')  # sort by points in descending order
+    )
+
+    leaderboard_data = [
+        {"name": player.username, "score": player.points, "avatar": request.build_absolute_uri(settings.MEDIA_URL + (player.avatar if player.avatar else "avatars/fox.jpg"))}
+        for player in players
+    ]
+
+    # calculate the current user rank
+    user_rank = None
+    for index, player in enumerate(leaderboard_data):
+        if player["name"] == request.user.username:
+            user_rank = index + 1
+            break
+
+    return JsonResponse(leaderboard_data, safe=False)
+
+>>>>>>> Stashed changes
     
 # View to fetch all questions from the database
 def fetch_questions(request):

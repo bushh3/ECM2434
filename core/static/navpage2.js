@@ -42,6 +42,28 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(err => {
         console.error("Failed to fetch avatar:", err);
     });
+
+    fetch('/leaderboard/api/user_rank/', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let rankElement = document.getElementById("user-rank");
+            if (rankElement) {
+                rankElement.textContent = data.rank;
+            }
+        } else {
+            console.error("Failed to fetch rank:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching rank:", err);
+    });
+
     // --------------------------------------------------------------------------------------------------
 
     // popup keep close when do not need them

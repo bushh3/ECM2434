@@ -1,6 +1,8 @@
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -16,6 +18,27 @@ class CustomUser(AbstractUser):
 class Player(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.email
+    
+@receiver(post_save, sender=CustomUser)
+def create_player_for_new_user(sender, instance, created, **kwargs):
+    if created and not hasattr(instance, 'player'):
+        Player.objects.create(user=instance)
+
+class Profile(models.Model):
+    user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE, related_name="profile")
+    avatar_url = models.CharField(max_length=255, blank=True, null=True, default="avatars/fox.jpg")
+
+    def __str__(self):
+        return f"Profile of {self.user.email}"
+    
+@receiver(post_save, sender=CustomUser)
+def create_related_objects(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.get_or_create(user=instance)
+        Player.objects.get_or_create(user=instance)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
