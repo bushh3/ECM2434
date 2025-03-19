@@ -1,16 +1,29 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy, get_resolver
 from django.db.models import F
 from .models import *
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import views as auth_views
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import default_token_generator
 from django.utils import timezone
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 import json
 import random
+import os
 
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST)
@@ -74,13 +87,24 @@ def signup(request):
         
         except IntegrityError:
             return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
-        
 
+def set_new_password(request):
+    return render(request, 'core/set_new_password.html')
+        
 def home(request):
     if (request.user.is_authenticated):
         return render(request, 'core/navpage2.html')
     else:
         return HttpResponseRedirect('/login/')
+        
+@login_required
+def get_user_score(request):
+    user = request.user
+    try:
+        player = Player.objects.get(user=user)
+        return JsonResponse({"success": True, "score": player.points})
+    except Player.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Player profile not found"}, status=404)
         
 def quiz(request):
     return render(request, 'core/quiz.html')
@@ -173,7 +197,7 @@ def get_quiz_results(request):
     
     result_text = f"{correct}|{wrong}|{current_score}|{total_score}"
     
-    return render(request, 'core/result.html', {'result_text': result_text})
+    return render(request, 'core/result.html', {'result_text': result_text})  
 
 @login_required
 def walking_game(request):
@@ -273,5 +297,163 @@ def get_trip_history(request):
 
     history_html += '</div>'
     return HttpResponse(history_html, status=200)
+    
+@login_required
+def upload_avatar(request): # 上传头像 Upload the avatar
+    if request.method == "POST":
+        if 'avatar' not in request.FILES:
+            return JsonResponse({"success": False, "error": "No file uploaded"}, status=400, content_type="application/json")
 
+        avatar_file = request.FILES['avatar']
+        
+        if not avatar_file.content_type.startswith('image/'):
+            return JsonResponse({"success": False, "error": "Invalid file type"}, status=400, content_type="application/json")
 
+        profile = get_object_or_404(Profile, user=request.user)
+
+        if profile.avatar_url and profile.avatar_url != "avatars/fox.jpg":
+            old_avatar_path = os.path.join(settings.MEDIA_ROOT, profile.avatar_url)
+            if os.path.exists(old_avatar_path):
+                os.remove(old_avatar_path)
+
+        avatar_path = f'avatars/{avatar_file.name}'
+        saved_path = default_storage.save(avatar_path, ContentFile(avatar_file.read()))
+        profile.avatar_url = saved_path
+        profile.save()
+
+        return JsonResponse({"success": True, "avatarUrl": f"{settings.MEDIA_URL}{profile.avatar_url}"}, content_type="application/json")
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def get_user_profile(request): # Profile页面获取用户信息，包括打招呼的地方 Profile page obtain user information
+    if request.method == "GET":
+        user = request.user
+
+        profile = get_object_or_404(Profile, user=user)
+        avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}" if profile.avatar_url else f"{settings.MEDIA_URL}avatars/fox.jpg"
+        return JsonResponse({
+            "success": True,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "avatar_url": avatar_url
+        })
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def get_avatar(request): # 获取用户头像 Obtain the user avatar
+    if request.method == "GET":
+        profile = get_object_or_404(Profile, user=request.user)
+        if profile.avatar_url:
+            avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}"
+        else:
+            avatar_url = f"{settings.MEDIA_URL}avatars/fox.jpg"
+        return JsonResponse({"success": True, "avatar_url": avatar_url}, content_type="application/json")
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def delete_account(request): # 注销账号 Cancel the account
+    if request.method == "DELETE":
+
+        user = request.user
+        user.delete()
+        logout(request)
+        return JsonResponse({"success": True, "message": "Account deleted successfully"}, content_type="application/json")
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def update_user_profile(request): # 修改个人信息Update the user information
+    if request.method == "PUT":
+
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            old_email = user.email
+            new_email = data.get('email', user.email)
+
+            if CustomUser.objects.filter(email=new_email).exclude(id=user.id).exists(): #检查邮箱名是否重复 Check whethe the email are duplicated
+                return JsonResponse({"success": False, "error": "This email is already in use"}, status=400, content_type="application/json")
+
+            user.username = data.get('username', user.username)
+            user.email = data.get('email', user.email)
+            user.first_name = data.get('first_name', user.first_name)
+            user.last_name = data.get('last_name', user.last_name)
+
+            user.save()
+
+            email_changed = old_email != user.email
+            if email_changed: #修改邮箱后要重新登录 User need to log in again after changing the email
+                logout(request)
+                return JsonResponse({"success": True, "message": "Profile updated successfully", "email_changed": True}, content_type="application/json")
+            return JsonResponse({"success": True, "message": "Profile updated successfully"}, content_type="application/json")
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400, content_type="application/json")
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def change_password(request): # 已登录用户的重设密码 Reset the password of the logged-in user
+    if request.method == "POST":
+
+        try:
+            data = json.loads(request.body)
+            new_password = data.get("new_password")
+
+            user = request.user
+
+            validate_password(new_password, user)
+            user.set_password(new_password)
+            user.save()
+
+            return JsonResponse({"success": True, "message": "Password updated successfully"}, content_type="application/json")
+        except ValidationError as e:
+            return JsonResponse({"success": False, "error": e.messages}, status=400, content_type="application/json")
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400, content_type="application/json")
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
+
+@login_required
+def logout_view(request): # 登出 Logout
+    if request.method == "POST":
+
+        logout(request)
+
+        request.session.flush()
+        response = JsonResponse({"success": True, "message": "Logged out successfully"}, content_type="application/json")
+        response.delete_cookie("sessionid")
+        response.delete_cookie("csrftoken")
+        return response
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json") 
+    
+class CustomPasswordResetView(auth_views.PasswordResetView):
+    def form_valid(self, form):
+        users = list(form.get_users(form.cleaned_data["email"]))
+        if not users:
+            return super().form_invalid(form)
+
+        user = users[0]
+        uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+        token = default_token_generator.make_token(user)
+
+        reset_url = self.request.build_absolute_uri(
+            reverse('core:password_reset_confirm', kwargs={'uidb64': uidb64, 'token': token})
+        )
+
+        form.save(
+            request=self.request,
+            use_https=self.request.is_secure(),
+            email_template_name='registration/password_reset_email.html',
+            subject_template_name='registration/password_reset_subject.txt',
+            token_generator=default_token_generator,
+            extra_email_context={'password_reset_confirm_url': reset_url},
+        )
+        return super().form_valid(form)
+    
+class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    success_url = reverse_lazy('core:password_reset_complete') 
