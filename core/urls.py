@@ -34,8 +34,10 @@ urlpatterns = [
     path('accounts/password_change/', PasswordChangeView.as_view(template_name='registration/password_change_form.html', success_url='/accounts/password_change/done/'), name='password_change'),
     path('accounts/password_change/done/', PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),
     path('api/logout', views.logout_view, name="logout"),
+    path('walkinggame/', views.walking_game, name="walkinggame"),
+    path('walkinggame/save/', views.save_trip, name="save_trip"),
+    path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
