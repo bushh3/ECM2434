@@ -26,7 +26,14 @@ class Player(models.Model):
 def create_player_for_new_user(sender, instance, created, **kwargs):
     if created and not hasattr(instance, 'player'):
         Player.objects.create(user=instance)
+        
+class Profile(models.Model):
+    user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE, related_name="profile")
+    avatar_url = models.CharField(max_length=255, blank=True, null=True, default="avatars/fox.jpg")
 
+    def __str__(self):
+        return f"Profile of {self.user.email}"
+        
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
 
@@ -107,3 +114,9 @@ class WalkingChallenge(models.Model):
 
     def __str__(self):
         return f"Challenge {self.session_id} for {self.player.user.email}"
+
+@receiver(post_save, sender=CustomUser)
+def create_related_objects(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.get_or_create(user=instance)
+        Player.objects.get_or_create(user=instance)
