@@ -21,4 +21,3 @@ urlpatterns = [
     path('walkinggame/save/', views.save_trip, name="save_trip"),
     path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),
 ]
-
