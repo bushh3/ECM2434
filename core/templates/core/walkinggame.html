@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Green Travel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <link rel="stylesheet" href="{% static 'walkinggame.css' %}">
+</head>
+<body>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <div class="container">
+        <!-- Map container placed at top -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <!-- Tab navigation -->
+        <div class="tab-navigation">
+            <div class="tab active" data-tab="tracking">
+                <i class="fas fa-map-marker-alt"></i> Tracking
+            </div>
+            <div class="tab" data-tab="history">
+                <i class="fas fa-history"></i> History
+            </div>
+        </div>
+        
+        <!-- Tracking panel -->
+        <div class="panel tracking-panel active" id="trackingPanel">
+            <!-- Distance display -->
+            <div class="distance-display">
+                <div>
+                    <span class="distance" id="distanceText">0.0</span>
+                    <span class="distance-target">km / Target 3km</span>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-value" id="speedValue">0.0</div>
+                    <div class="stat-label">Speed (km/h)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="timeValue">00:00</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+            
+            <!-- Action buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-start" id="startBtn">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button class="btn btn-pause" id="pauseBtn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="btn btn-stop" id="stopBtn" disabled>
+                    <i class="fas fa-stop"></i> End
+                </button>
+            </div>
+        </div>
+        
+        <!-- History panel -->
+        <div class="panel history-panel" id="historyPanel">
+            
+            <div class="history-list" id="historyList">
+                <div class="no-records">No travel records yet. Start your green travel journey!</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert" id="alert"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="{% static 'walkinggame.js' %}"></script>
+</body>
+</html>

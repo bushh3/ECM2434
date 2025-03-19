@@ -1,6 +1,8 @@
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -16,6 +18,14 @@ class CustomUser(AbstractUser):
 class Player(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.email
+    
+@receiver(post_save, sender=CustomUser)
+def create_player_for_new_user(sender, instance, created, **kwargs):
+    if created and not hasattr(instance, 'player'):
+        Player.objects.create(user=instance)
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
@@ -74,3 +84,26 @@ class DIYCreation(models.Model):
 class Like(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     creation = models.ForeignKey(DIYCreation, on_delete=models.CASCADE)
+
+class WalkingChallenge(models.Model):
+    player = models.ForeignKey('Player', on_delete=models.CASCADE)
+    session_id = models.CharField(max_length=100)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    distance = models.FloatField()
+    duration = models.IntegerField()
+    is_completed = models.BooleanField(default=False)
+    points_earned = models.IntegerField(default=0)
+    track_points = models.TextField(default="")  
+
+    def set_track_points(self, points_list):
+        formatted_points = ";".join([f"{point['lat']},{point['lon']}" for point in points_list])
+        self.track_points = formatted_points
+
+    def get_track_points(self):
+        if not self.track_points:
+            return []
+        return [{"lat": float(lat), "lon": float(lon)} for lat, lon in (point.split(",") for point in self.track_points.split(";"))]
+
+    def __str__(self):
+        return f"Challenge {self.session_id} for {self.player.user.email}"

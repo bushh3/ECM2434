@@ -17,5 +17,7 @@ urlpatterns = [
     path('quiz-results/', views.get_quiz_results, name="get_quiz_results"),
     path('profile/', views.profile_view, name="profile"),
     path('admin/', admin.site.urls),
+    path('walkinggame/', views.walking_game, name="walkinggame"),
+    path('walkinggame/save/', views.save_trip, name="save_trip"),
+    path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),
 ]
-
