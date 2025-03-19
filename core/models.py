@@ -8,9 +8,9 @@ from django.dispatch import receiver
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    # username = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=50, unique=False)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.email
