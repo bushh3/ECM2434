@@ -17,6 +17,10 @@ class LoginTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
 
+    def test_login_view_invalid(self):
+        response = self.client.post(reverse('core:login'), {'email': 'invalid@example.com', 'password': 'wrongpassword'})
+        self.assertContains(response, 'Invalid username or password', status_code=200)
+
     def test_signup(self):
         response = self.client.post(reverse('core:signup'), {
             'username': 'testuser',
