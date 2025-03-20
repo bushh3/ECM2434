@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             modalTitle.textContent = location;
             zipcodeValue.textContent = zipcode;
-            navigateBtn.href = `https://maps.google.com/?q=${encodeURIComponent(location)}`;
+            navigateBtn.href = `https://maps.google.com/?q=${encodeURIComponent(zipcode)}`;
             
             const modalDetails = document.querySelectorAll('.location-detail');
             if (modalDetails.length >= 3) {
