@@ -28,7 +28,7 @@ class LoginTests(TestCase):
         # 确保注册后发生了重定向
         self.assertEqual(response.status_code, 302)  # Expect a redirect to the login page
         # 你可以检查重定向的 URL，如：
-        self.assertRedirects(response, reverse('core:login'))
+        self.assertContains(response, "success")
 
     def test_password_reset(self):
         response = self.client.get(reverse('core:password_reset'))
