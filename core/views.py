@@ -265,10 +265,19 @@ def get_trip_history(request):
             status_text = "Completed" if trip.is_completed else "Incomplete"
             points_text = f"{trip.points_earned} Points" if trip.is_completed else "No Points"
 
-            duration_seconds = trip.duration // 1000 if trip.duration > 3600 else trip.duration
-            minutes = duration_seconds // 60
-            seconds = duration_seconds % 60
-            duration_text = f"{minutes} min {seconds} sec"
+            try:
+                duration_milliseconds = float(trip.duration)
+             
+                duration_seconds = duration_milliseconds / 1000
+            
+                minutes = int(duration_seconds // 60)
+                seconds = int(duration_seconds % 60)
+               
+                duration_text = f"{minutes} min {seconds} sec"
+            except (ValueError, TypeError):
+                
+                duration_text = "0 min 0 sec"
+                print(f"Error processing duration: {trip.duration}, type: {type(trip.duration)}")
 
             history_html += f"""
                 <div class="{item_class}">
@@ -297,7 +306,9 @@ def get_trip_history(request):
 
     history_html += '</div>'
     return HttpResponse(history_html, status=200)
-    
+
+
+
 @login_required
 def upload_avatar(request): # 上传头像 Upload the avatar
     if request.method == "POST":

@@ -5,13 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastPosition = null;
     let distance = 0;
     let startTime = null;
+    let totalElapsedTime = 0; 
+    let pauseStartTime = null;
     let timerInterval = null;
     let watchId = null;
     let isTracking = false;
     let isPaused = false;
     let sessionId = null;
-    let wakeLock = null;
-
 
 
 /******************* PART 1 : NEED TO CONNECT WITH THE BACKEND ************************/    
@@ -198,27 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    //delete??
-    // 请求保持屏幕唤醒
-    // async function requestWakeLock() {
-    //     if ('wakeLock' in navigator) {
-    //         try {
-    //             wakeLock = await navigator.wakeLock.request('screen');
-    //         } catch (err) {
-    //             console.error('Wake Lock error:', err);
-    //         }
-    //     }
-    // }
-    
-    // // 释放屏幕唤醒锁
-    // function releaseWakeLock() {
-    //     if (wakeLock !== null) {
-    //         wakeLock.release()
-    //           .then(() => {
-    //             wakeLock = null;
-    //           });
-    //     }
-    // }
     
     // Start tracking
     function startTracking() {
@@ -227,32 +206,29 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // If not resuming from pause, reset data
+        // If not resuming from pause, reset all data
         if (!isPaused) {
             distance = 0;
             trackPoints = [];
             trackPolyline.setLatLngs([]);
             updateDistanceDisplay();
-            startTime = new Date();
+            totalElapsedTime = 0; // Reset accumulated time
             sessionId = 'session_' + Date.now();
         }
         
+        startTime = new Date();
         isTracking = true;
         isPaused = false;
         
-        // // 防止屏幕睡眠（如果支持）
-        // requestWakeLock();
-        
-        // Update button states
         document.getElementById('startBtn').disabled = true;
         document.getElementById('pauseBtn').disabled = false;
         document.getElementById('stopBtn').disabled = false;
         
-        // Start timer
+        updateTimer();
+
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(updateTimer, 1000);
         
-        // Start GPS tracking
         watchId = navigator.geolocation.watchPosition(
             updatePosition,
             error => {
@@ -263,37 +239,40 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
     
-    // Pause tracking
     function pauseTracking() {
         if (!isTracking) return;
+        
+        // Record pause start time
+        pauseStartTime = new Date();
+        
+        // Add current session time to totalElapsedTime
+        if (startTime) {
+            const sessionDuration = pauseStartTime - startTime;
+            totalElapsedTime += sessionDuration;
+            console.log(`Paused after ${sessionDuration}ms, total elapsed: ${totalElapsedTime}ms`);
+        }
         
         isTracking = false;
         isPaused = true;
         
-        // Stop location monitoring
         if (watchId !== null) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
         }
         
-        // Stop timer
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
         }
         
-        // // 释放唤醒锁
-        // releaseWakeLock();
-        
-        // Update button states
         document.getElementById('startBtn').disabled = false;
         document.getElementById('pauseBtn').disabled = true;
         document.getElementById('stopBtn').disabled = false;
     }
     
-    
-   
     async function stopTracking() {
+        let endTime = new Date();
+        
         // If tracking, stop first
         if (isTracking) {
             if (watchId !== null) {
@@ -306,29 +285,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 timerInterval = null;
             }
             
-        //     // 释放唤醒锁
-        //     releaseWakeLock();
+            if (startTime) {
+                let finalSessionDuration = endTime - startTime;
+                
+                if (finalSessionDuration <= 0) {
+                    console.log("Detected extremely short session, adjusting to 1ms");
+                    finalSessionDuration = 1;
+                }
+                
+                totalElapsedTime += finalSessionDuration;
+                console.log(`Session stopped: lasted ${finalSessionDuration}ms, total ${totalElapsedTime}ms`);
+            }
         }
         
         isTracking = false;
         isPaused = false;
         
-        // Update button states
         document.getElementById('startBtn').disabled = false;
         document.getElementById('pauseBtn').disabled = true;
         document.getElementById('stopBtn').disabled = true;
         
+        // Ensure total duration is at least 1ms
+        let finalDuration = totalElapsedTime;
+        if (finalDuration <= 0) {
+            console.log("Total duration too short, adjusting to 1ms");
+            finalDuration = 1;
+        }
+        
+        // Ensure valid start time
+        let effectiveStartTime = startTime;
+        if (!effectiveStartTime) {
+            effectiveStartTime = new Date(endTime.getTime() - finalDuration);
+        }
+        
         // Collect trip data
         const tripData = {
-            sessionId: sessionId,
-            startTime: startTime,
-            endTime: new Date(),
+            sessionId: sessionId || 'session_' + Date.now(), // Ensure session ID exists
+            startTime: effectiveStartTime,
+            endTime: endTime,
             distance: distance,
-            duration: startTime ? (new Date() - startTime) : 0,
+            duration: finalDuration,
             isCompleted: distance >= 3,
             pointsEarned: distance >= 3 ? 30 : 0
         };
-
+    
         try {
             await sendTripDataToBackend(tripData);
             updateHistoryUI(); 
@@ -344,42 +344,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Position update handler
-    function updatePosition(position) {
-        const currentPosition = [position.coords.latitude, position.coords.longitude];
-        
-        // Update user position marker
-        if (userMarker) {
-            userMarker.setLatLng(currentPosition);
-        } else {
-            userMarker = L.marker(currentPosition).addTo(map);
-        }
-        
-        // Add point to route
-        trackPoints.push({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            timestamp: new Date().toISOString()
-        });
-        
-        trackPolyline.addLatLng(currentPosition);
-        
-        // Update map view to keep user centered
-        map.setView(currentPosition);
-        
-        // Calculate distance from last point
-        if (lastPosition) {
-            const segmentDistance = calculateDistance(
-                lastPosition[0], lastPosition[1],
-                currentPosition[0], currentPosition[1]
-            );
+    function updateTimer() {
+
+        if (!isTracking) {
+            // Convert to minutes and seconds
+            const totalSeconds = Math.floor(totalElapsedTime / 1000);
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
             
-            distance += segmentDistance / 1000;
-            updateDistanceDisplay();
-            updateSpeedDisplay(position.coords.speed);
+            document.getElementById('timeValue').textContent = `${minutes}:${seconds}`;
+            return;
         }
         
-        lastPosition = currentPosition;
+        // Calculate current session time
+        let currentSessionTime = 0;
+        if (startTime) {
+            const now = new Date();
+            currentSessionTime = now - startTime;
+            
+            // Ensure session time is not negative
+            if (currentSessionTime < 0) {
+                console.log("Negative session time detected, setting to 0");
+                currentSessionTime = 0;
+            }
+        }
+        
+        const displayTime = totalElapsedTime + currentSessionTime;
+        const totalSeconds = Math.floor(displayTime / 1000);
+        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+        
+        document.getElementById('timeValue').textContent = `${minutes}:${seconds}`;
     }
     
     // Calculate distance between two points (Haversine formula)
@@ -413,16 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('speedValue').textContent = displaySpeed.toFixed(1);
     }
     
-    // Update timer
-    function updateTimer() {
-        if (!startTime) return;
-        
-        const elapsedTime = new Date(new Date() - startTime);
-        const minutes = elapsedTime.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = elapsedTime.getUTCSeconds().toString().padStart(2, '0');
-        
-        document.getElementById('timeValue').textContent = `${minutes}:${seconds}`;
-    }
     
     // Show alert message
     function showAlert(message, duration = 3000) {
@@ -475,6 +460,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show completion success (color: green)
     function showCompletionSuccess() {
+    
+        map.closePopup();
+    
+        document.querySelectorAll('.leaflet-popup').forEach(popup => {
+            popup.remove();
+        });
+        
         const successPopupContent = `
             <div style="text-align: center;">
                 <h3 style="margin: 5px 0 10px 0;">Congratulations!</h3>
@@ -485,14 +477,38 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-        L.popup()
+        const popup = L.popup();
+        
+        popup.on('add', function(event) {
+            setTimeout(() => {
+                const popupElement = document.querySelector('.leaflet-popup');
+                if (popupElement) {
+                    const wrapper = popupElement.querySelector('.leaflet-popup-content-wrapper');
+                    const tip = popupElement.querySelector('.leaflet-popup-tip');
+                    
+                    if (wrapper) wrapper.style.backgroundColor = '#4CAF50';  // 绿色
+                    if (tip) tip.style.backgroundColor = '#4CAF50';  // 绿色
+                    
+                    popupElement.setAttribute('data-popup-type', 'success');
+                }
+            }, 10);
+        });
+        
+        popup
             .setLatLng(userMarker.getLatLng())
             .setContent(successPopupContent)
             .openOn(map);
     }
-    
+
     // Show completion failure (color: orange)
     function showCompletionFailure() {
+
+        map.closePopup();
+        
+        document.querySelectorAll('.leaflet-popup').forEach(popup => {
+            popup.remove();
+        });
+        
         const failurePopupContent = `
             <div style="text-align: center;">
                 <h3 style="margin: 5px 0 10px 0;">Almost There!</h3>
@@ -504,26 +520,28 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-       
-        const customPopup = L.popup({
-            className: 'failure-popup'
-        });
+        const popup = L.popup();
         
-        customPopup.on('add', function(event) {
+        popup.on('add', function(event) {
             setTimeout(() => {
-                const popupWrapper = document.querySelector('.leaflet-popup-content-wrapper');
-                const popupTip = document.querySelector('.leaflet-popup-tip');
-                if (popupWrapper) popupWrapper.style.backgroundColor = '#FFB347';
-                if (popupTip) popupTip.style.backgroundColor = '#FFB347';
-            }, 10);
+                const popupElement = document.querySelector('.leaflet-popup');
+                if (popupElement) {
+                    const wrapper = popupElement.querySelector('.leaflet-popup-content-wrapper');
+                    const tip = popupElement.querySelector('.leaflet-popup-tip');
+                
+                    if (wrapper) wrapper.style.backgroundColor = '#FFB347';  
+                    if (tip) tip.style.backgroundColor = '#FFB347'; 
+                    
+                    popupElement.setAttribute('data-popup-type', 'failure');
+                }
+            }, 50);  
         });
         
-        customPopup
+        popup
             .setLatLng(userMarker.getLatLng())
             .setContent(failurePopupContent)
             .openOn(map);
     }
-    
 
 
 /************************** PART 3: HISTORY UI (use the functions in part1) *******************************/
