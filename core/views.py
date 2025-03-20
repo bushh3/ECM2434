@@ -200,7 +200,7 @@ def scan_qr_code(request):
         return HttpResponse("status=error&message=Invalid request method", content_type="text/plain")
 
     user = request.user
-    player = Player.objects.get(user=user)
+    player, created = Player.objects.get_or_create(user=user)
     
     today = now().date()
     
