@@ -140,4 +140,13 @@ class QuizViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "2|0|10|20")  # Ensure the result string matches expected format
 
+class ProfileAvatarTestCase(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        # 使用 CustomUser 创建用户
+        self.user = CustomUser.objects.create_user(username="testuser", email="test@example.com", password="password123")
+        self.client.login(username='testuser', password='password123')
+
+
 
