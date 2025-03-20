@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const API_ENDPOINTS = {
         SAVE_TRIP: '/save/',
         GET_TRIPS: '/history/',
-        DELETE_TRIP: '/delete/',
     };
 
     // CSRF
@@ -116,41 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    
-    /**
-     * delete history
-     * @param {string} tripId 
-     */
-    async function deleteTripFromBackend(tripId) {
-        try {
-            const formData = new FormData();
-            formData.append('trip_id', tripId);
-            
-            const response = await fetch(API_BASE_URL + API_ENDPOINTS.DELETE_TRIP, {
-                method: 'POST', 
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: formData,
-                credentials: 'same-origin' 
-            });
-            
-            if (response.ok) {
-                showAlert('Record deleted from server');
-                return true;
-            } else {
-                console.error('Failed to delete record:', response.status);
-                showAlert('Failed to delete record from server');
-                return false;
-            }
-        } catch (error) {
-            console.error('Error deleting record:', error);
-            showAlert('Connection error, please try again');
-            return false;
-        }
-    }
-    
-   
+
 
 
 
@@ -575,27 +540,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-
-    
-    //delete records UI
-    async function deleteRecord(recordId) {
-        try {
-            // 从后端删除
-            const backendDeleted = await deleteTripFromBackend(recordId);
-            
-            if (backendDeleted) {
-                updateHistoryUI();
-                showAlert('Record deleted successfully');
-            } else {
-                showAlert('Failed to delete record');
-            }
-        } catch (err) {
-            console.error('Error deleting record:', err);
-            showAlert('Connection error, please try again');
-        }
-    }
-    
-
 
 
 
