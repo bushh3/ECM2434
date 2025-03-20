@@ -6,6 +6,10 @@ from django.contrib.auth.models import User
 from core.models import Player
 from django.test import TestCase
 from core.models import CustomUser  # 引入 CustomUser 模型
+import json
+
+
+
 
 class LoginTests(TestCase):
     def test_login(self):
@@ -18,7 +22,8 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_login_view_invalid(self):
-        response = self.client.post(reverse('core:login'), {'email': 'invalid@example.com', 'password': 'wrongpassword'})
+        response = self.client.post(reverse('core:login'),
+                                    {'email': 'invalid@example.com', 'password': 'wrongpassword'})
         self.assertContains(response, 'Invalid username or password', status_code=200)
 
     def test_signup(self):
@@ -31,12 +36,31 @@ class LoginTests(TestCase):
         })
         # 确保注册后发生了重定向
         self.assertEqual(response.status_code, 200)  # Expect a redirect to the login page
-       
+
         self.assertContains(response, "success")
 
     def test_password_reset(self):
         response = self.client.get(reverse('core:password_reset'))
         self.assertEqual(response.status_code, 200)
+
+class ChangePasswordTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_change_password(self):
+        # 测试修改密码
+        response = self.client.post(reverse('core:password_change'), data=json.dumps({
+            'new_password': 'newpassword123',
+            'new_password2': 'newpassword123',  # 确认新密码
+        }), content_type="application/json")
+
+        # 验证响应内容
+        self.assertEqual(response.status_code, 302) # 在测试中检查重定向
+        self.assertJSONEqual(response.content, {
+            "success": True,
+            "message": "Password updated successfully"
+        })  # 确保密码修改成功
 
 
 class QuizModelTest(TestCase):
@@ -126,7 +150,7 @@ class QuizViewTest(TestCase):
         self.assertEqual(self.player.points, 10)  # 2 questions * 5 points per question = 10 points
 
     def test_get_quiz_results(self):
-        self.client.login(username="testuser", password="testpassword")
+        self.client.login(email="test@example.com", password="testpassword")
         session = self.client.session
         session["quiz_result"] = {
             "correct": 2,  # 2 correct answers
@@ -138,15 +162,68 @@ class QuizViewTest(TestCase):
 
         response = self.client.get(reverse("core:get_quiz_results"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "2|0|10|20")  # Ensure the result string matches expected format
+        self.assertContains(response, "2|0|10|20") # Ensure the result string matches expected format
+
 
 class ProfileAvatarTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
         # 使用 CustomUser 创建用户
-        self.user = CustomUser.objects.create_user(username="testuser", email="test@example.com", password="password123")
+        self.user = CustomUser.objects.create_user(username="testuser", email="test@example.com",
+                                                   password="password123")
         self.client.login(username='testuser', password='password123')
+
+class SaveTripTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_save_trip(self):
+        self.client.login(email="test@example.com", password="testpassword")  # 登录用户
+        response = self.client.post(
+            reverse('core:save_trip'),
+            data={
+                'session_id': '123',
+                'start_time': '2023-01-01T00:00:00',
+                'end_time': '2023-01-01T01:00:00',
+                'distance': '5.0',
+                'duration': '3600',
+                'is_completed': 'true',
+                'track_points_count': '0',
+            },
+            content_type='application/x-www-form-urlencoded'  # 使用表单数据格式
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {'message': 'Trip data saved successfully.', 'status': 200})
+
+    def test_save_trip_invalid_request(self):
+        self.client.login(username='testuser', password='testpassword')  # 登录用户
+        # 测试无效请求
+        response = self.client.post(reverse('core:save_trip'), {}, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {'error': 'Invalid request.', 'status': 400})
+
+class GetTripHistoryTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+class DeleteAccountTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+class LogoutViewTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_logout(self):
+        # 测试注销
+        response = self.client.post(reverse('core:logout'))
+        self.assertEqual(response.status_code, 302)
+        self.assertJSONEqual(response.content, {"success": True, "message": "Logged out successfully"})  # 确保注销成功
 
 
 
