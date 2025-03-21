@@ -259,16 +259,11 @@ def get_trip_history(request):
             points_text = f"{trip.points_earned} Points" if trip.is_completed else "No Points"
 
             try:
-                duration_milliseconds = float(trip.duration)
-             
-                duration_seconds = duration_milliseconds / 1000
-            
+                duration_seconds = float(trip.duration)
                 minutes = int(duration_seconds // 60)
                 seconds = int(duration_seconds % 60)
-               
                 duration_text = f"{minutes} min {seconds} sec"
             except (ValueError, TypeError):
-                
                 duration_text = "0 min 0 sec"
                 print(f"Error processing duration: {trip.duration}, type: {type(trip.duration)}")
 
@@ -299,7 +294,6 @@ def get_trip_history(request):
 
     history_html += '</div>'
     return HttpResponse(history_html, status=200)
-
 
 
 @login_required
