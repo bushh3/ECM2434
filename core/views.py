@@ -43,11 +43,8 @@ def login_view(request):
 
 def signup(request):
     # if no POST, display sign up page
-    if request.POST == {}:
-        return render(request, 'core/signup.html')
-    
-    # if POST
-    else:
+    if request.method == "POST":
+
         # get information
         username = request.POST['username']
         email = request.POST['email']
@@ -75,18 +72,12 @@ def signup(request):
             player = Player(user=user)
             player.save()
 
-            # authenticate and log in
-            authenticated_user = authenticate(
-            username=username, 
-            password=password
-            )
-            
-            if authenticated_user:
-                login(request, authenticated_user)
-            return redirect('core:home')
+            return render(request, 'core/signup.html', {"success": True})
         
         except IntegrityError:
             return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
+        
+    return render(request, 'core/signup.html')
 
 def set_new_password(request):
     return render(request, 'core/set_new_password.html')
