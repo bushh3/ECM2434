@@ -159,8 +159,6 @@ def check_answer(request):
         player.points += current_score
         player.save()
 
-        player.refresh_from_db()
-
         # log to session
         request.session['quiz_result'] = {
             'correct': correct,
@@ -175,8 +173,6 @@ def check_answer(request):
 
 @login_required
 def get_quiz_results(request):
-    if not request.user.is_authenticated:
-        return redirect('core:login')
     player = request.user.player
     quiz_result = request.session.get('quiz_result', {
         'correct': 0,
