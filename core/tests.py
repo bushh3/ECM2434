@@ -10,8 +10,6 @@ from django.utils.http import urlencode
 import json
 
 
-
-
 class LoginTests(TestCase):
     def test_login(self):
         # 使用 CustomUser 创建用户
@@ -43,6 +41,7 @@ class LoginTests(TestCase):
     def test_password_reset(self):
         response = self.client.get(reverse('core:password_reset'))
         self.assertEqual(response.status_code, 200)
+
 
 class ChangePasswordTests(TestCase):
     def setUp(self):
@@ -79,6 +78,7 @@ class ChangePasswordTests(TestCase):
                 "success": True,
                 "message": "Password updated successfully"
             })  # 确保密码修改成功
+
 
 
 class QuizModelTest(TestCase):
@@ -149,7 +149,7 @@ class QuizViewTest(TestCase):
         self.assertEqual(response.status_code, 302)  # Redirect to login
 
     def test_check_answer_logged_in(self):
-        self.client.login(username="testuser", password="testpassword")
+        self.client.login(email="test@example.com", password="testpassword")
         session = self.client.session
         session["current_questions"] = {
             "1": {"id": self.question1.id, "correct_option": "A"},
@@ -162,7 +162,10 @@ class QuizViewTest(TestCase):
             "question_2": "B",
         })
         self.assertEqual(response.status_code, 302)  # Expect a redirect after submitting answers
-        self.player.refresh_from_db()
+        import time
+        time.sleep(1)
+
+        self.player = Player.objects.get(user=self.user)
 
         # Test if the score is 10 points after answering 2 questions correctly
         self.assertEqual(self.player.points, 10)  # 2 questions * 5 points per question = 10 points
@@ -180,7 +183,7 @@ class QuizViewTest(TestCase):
 
         response = self.client.get(reverse("core:get_quiz_results"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "2|0|10|20") # Ensure the result string matches expected format
+        self.assertContains(response, "2|0|10|20")  # Ensure the result string matches expected format
 
 
 class ProfileAvatarTestCase(TestCase):
@@ -216,11 +219,20 @@ class SaveTripTests(TestCase):
         self.assertJSONEqual(response.content, {'message': 'Trip data saved successfully.', 'status': 200})
 
     def test_save_trip_invalid_request(self):
-        self.client.login(username='testuser', password='testpassword')  # 登录用户
-        # 测试无效请求
-        response = self.client.post(reverse('core:save_trip'), {}, content_type='application/json')
+        self.client.login(email="test@example.com", password="testpassword")
+        # 测试没有提供必需字段时的请求
+        response = self.client.post(reverse('core:save_trip'), {
+            'session_id': '',
+            'start_time': '',
+            'end_time': '',
+            'distance': '',
+            'duration': '',
+            'is_completed': '',
+            'track_points_count': '',
+        }, content_type='application/x-www-form-urlencoded')
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {'error': 'Invalid request.', 'status': 400})
+
 
 class GetTripHistoryTests(TestCase):
     def setUp(self):
@@ -238,10 +250,15 @@ class LogoutViewTests(TestCase):
         self.client.login(username='testuser', password='testpassword')
 
     def test_logout(self):
-        # 测试注销
-        response = self.client.post(reverse('core:logout'))
-        self.assertEqual(response.status_code, 302)
-        self.assertJSONEqual(response.content, {"success": True, "message": "Logged out successfully"})  # 确保注销成功
+        # 登录用户
+        self.client.login(email="test@example.com", password="testpassword")
 
+        # 发送 POST 请求到登出视图
+        response = self.client.post('/logout/')  # 确保是 POST 请求
 
+        # 确保状态码是 200（不会重定向）
+        self.assertEqual(response.status_code, 200)
 
+        # 确保返回的 JSON 响应是成功的
+        self.assertJSONEqual(str(response.content, encoding='utf8'),
+                             '{"success": true, "message": "Logged out successfully"}')
