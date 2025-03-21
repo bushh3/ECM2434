@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from .models import Quiz, Question, Player, PlayerQuiz
@@ -8,6 +8,12 @@ from django.test import TestCase
 from core.models import CustomUser  # 引入 CustomUser 模型
 from django.utils.http import urlencode
 import json
+import os
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.storage import default_storage
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from .models import Profile
 
 
 class LoginTests(TestCase):
@@ -186,14 +192,46 @@ class QuizViewTest(TestCase):
         self.assertContains(response, "2|0|10|20")  # Ensure the result string matches expected format
 
 
+@override_settings(CSRF_COOKIE_SECURE=False, CSRF_COOKIE_HTTPONLY=False)
 class ProfileAvatarTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
-        # 使用 CustomUser 创建用户
-        self.user = CustomUser.objects.create_user(username="testuser", email="test@example.com",
-                                                   password="password123")
-        self.client.login(username='testuser', password='password123')
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            password="testpassword"
+        )
+        # 确保 Profile 对象已创建
+        self.profile, created = Profile.objects.get_or_create(user=self.user)
+        self.client.login(email="test@example.com", password="testpassword")
+
+    def test_upload_avatar(self):
+        # 创建模拟文件
+        avatar_file = SimpleUploadedFile("test_avatar.jpg", b"file_content", content_type="image/jpeg")
+
+        # 发送 POST 请求，跟随重定向
+        response = self.client.post(
+            reverse('core:upload_avatar'),
+            {'avatar': avatar_file},
+            follow=True  # 跟随重定向
+        )
+
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertIn('avatarUrl', response.json())
+
+        # 检查头像是否保存到数据库
+        self.user.profile.refresh_from_db()
+        self.assertTrue(self.user.profile.avatar_url)
+
+        # 清理上传的文件
+        if self.user.profile.avatar_url:
+            avatar_path = os.path.join(settings.MEDIA_ROOT, self.user.profile.avatar_url)
+            if os.path.exists(avatar_path):
+                os.remove(avatar_path)
+
 
 class SaveTripTests(TestCase):
     def setUp(self):
