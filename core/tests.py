@@ -13,7 +13,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from .models import Profile
+from .models import Profile, WalkingChallenge
 
 
 class LoginTests(TestCase):
@@ -330,10 +330,63 @@ class SaveTripTests(TestCase):
         self.assertJSONEqual(response.content, {'error': 'session_id cannot be empty'})
 
 
+CustomUser = get_user_model()
+
 class GetTripHistoryTests(TestCase):
+
     def setUp(self):
-        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(email="test@example.com", password="testpassword")
+        # 创建用户并登录
+        self.user = CustomUser.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword'
+        )
+        self.client = Client()
+        self.client.login(email="test@example.com", password="testpassword")  # 使用 email 登录
+
+    def test_get_trip_history_unauthenticated(self):
+        # 未登录用户访问
+        self.client.logout()  # 登出用户
+        response = self.client.get(reverse('core:get_trip_history'))
+        # 检查是否重定向到登录页面
+        self.assertEqual(response.status_code, 302)  # 302 是重定向状态码
+        self.assertIn('/login/', response.url)  # 检查是否重定向到登录页面
+
+    def test_get_trip_history_no_trips(self):
+        # 用户没有行程记录
+        response = self.client.get(reverse('core:get_trip_history'))
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('No travel records yet', response.content.decode())  # 检查是否返回无记录提示
+
+    def test_get_trip_history_with_trips(self):
+        # 创建 Player 对象（如果不存在）
+        if not hasattr(self.user, 'player'):
+            Player.objects.create(user=self.user, points=0)
+
+        # 创建行程记录
+        WalkingChallenge.objects.create(
+            player=self.user.player,
+            start_time='2023-01-01T00:00:00',
+            end_time='2023-01-01T01:00:00',
+            distance=5.0,
+            duration=3600,  # 3600 秒 = 60 分钟
+            is_completed=True,
+            points_earned=10
+        )
+
+        # 发送 GET 请求
+        response = self.client.get(reverse('core:get_trip_history'))
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+
+        # 检查返回的 HTML 是否正确
+        self.assertIn('Activity History', content)  # 检查标题
+        self.assertIn('5.0 km', content)  # 检查距离
+        self.assertIn('60 min 0 sec', content)  # 检查时长
+        self.assertIn('10 Points', content)  # 检查积分
+        self.assertIn('Completed', content)  # 检查状态
 
 class DeleteAccountTests(TestCase):
     def setUp(self):
