@@ -198,6 +198,8 @@ def walking_game(request):
 def save_trip(request):
     if request.method == 'POST':
         session_id = request.POST.get('session_id')
+        if not session_id:
+            return JsonResponse({'error': 'session_id cannot be empty'}, status=400)
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
         distance = request.POST.get('distance')
