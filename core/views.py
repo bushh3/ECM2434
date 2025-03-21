@@ -212,7 +212,7 @@ def scan_qr_code(request):
     if not RecyclingBin.objects.filter(qr_code=qr_code).exists():
         return HttpResponse("status=invalid&message=Invalid QR code. Please try again.", content_type="text/plain")
     
-    if ScanRecord.objects.filter(user=user, scan_date=today).exists():
+    if ScanRecord.objects.filter(user=user, scan_date=today, qr_code=qr_code).exists(): # users can scan once per station per day
         return HttpResponse("status=already_scanned_today&message=Task completed. Please come back tomorrow.", content_type="text/plain")
 
     # record the scanning information

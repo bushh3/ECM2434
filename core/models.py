@@ -58,7 +58,7 @@ class ScanRecord(models.Model):
     scan_date = models.DateField(default=now)
 
     class Meta:
-        unique_together = ('user', 'scan_date')  # users can only scan the QR code once a day
+        unique_together = ('user', 'scan_date', 'qr_code')  # users can scan once per station per day
 
     def __str__(self):
         return f"{self.user.email} - {self.qr_code} ({self.scan_date})"

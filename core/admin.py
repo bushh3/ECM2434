@@ -24,6 +24,8 @@ class RecyclingBinAdmin(admin.ModelAdmin):
 @admin.register(ScanRecord)
 class ScanRecordAdmin(admin.ModelAdmin):
     list_display = ('user', 'qr_code', 'scan_date')
+    list_filter = ('user', 'scan_date')
+    ordering = ('user', 'scan_date')
 
 admin.site.register(Quiz)
 admin.site.register(Question)
