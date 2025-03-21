@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from core.models import Player
 from django.test import TestCase
 from core.models import CustomUser  # 引入 CustomUser 模型
+from django.utils.http import urlencode
 import json
 
 
@@ -48,19 +49,36 @@ class ChangePasswordTests(TestCase):
         self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
         self.client.login(username='testuser', password='testpassword')
 
-    def test_change_password(self):
-        # 测试修改密码
-        response = self.client.post(reverse('core:password_change'), data=json.dumps({
-            'new_password': 'newpassword123',
-            'new_password2': 'newpassword123',  # 确认新密码
-        }), content_type="application/json")
+    class ChangePasswordTests(TestCase):
+        def test_change_password(self):
+            # 首先创建一个用户并登录
+            user = User.objects.create_user(
+                email='test@example.com',
+                password='testpassword123'
+            )
+            self.client.login(email='test@example.com', password='testpassword123')
 
-        # 验证响应内容
-        self.assertEqual(response.status_code, 302) # 在测试中检查重定向
-        self.assertJSONEqual(response.content, {
-            "success": True,
-            "message": "Password updated successfully"
-        })  # 确保密码修改成功
+            # 获取CSRF token
+            response = self.client.get(reverse('core:password_change'))
+            csrf_token = response.cookies['csrftoken'].value
+
+            # 模拟POST请求，提交新密码
+            response = self.client.post(
+                reverse('core:password_change'),
+                data=json.dumps({
+                    'new_password': 'newpassword123',
+                    'new_password2': 'newpassword123',
+                }),
+                content_type="application/json",
+                HTTP_X_CSRFTOKEN=csrf_token  # 传递 CSRF Token
+            )
+
+            # 验证响应内容
+            self.assertEqual(response.status_code, 200)  # 检查返回的是 200 状态码，而不是重定向
+            self.assertJSONEqual(response.content, {
+                "success": True,
+                "message": "Password updated successfully"
+            })  # 确保密码修改成功
 
 
 class QuizModelTest(TestCase):
