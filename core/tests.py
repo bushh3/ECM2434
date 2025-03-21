@@ -198,13 +198,11 @@ class ProfileAvatarTestCase(TestCase):
 class SaveTripTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.client.login(email="test@example.com", password="testpassword")
 
     def test_save_trip(self):
         self.client.login(email="test@example.com", password="testpassword")  # 登录用户
-        response = self.client.post(
-            reverse('core:save_trip'),
-            data={
+        data={
                 'session_id': '123',
                 'start_time': '2023-01-01T00:00:00',
                 'end_time': '2023-01-01T01:00:00',
@@ -212,8 +210,11 @@ class SaveTripTests(TestCase):
                 'duration': '3600',
                 'is_completed': 'true',
                 'track_points_count': '0',
-            },
-            content_type='application/x-www-form-urlencoded'  # 使用表单数据格式
+        }
+
+        response = self.client.post(
+            reverse('core:save_trip'),
+            data=data
         )
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {'message': 'Trip data saved successfully.', 'status': 200})
@@ -229,32 +230,33 @@ class SaveTripTests(TestCase):
             'duration': '',
             'is_completed': '',
             'track_points_count': '',
-        }, content_type='application/x-www-form-urlencoded')
+        }, 
+        )
         self.assertEqual(response.status_code, 400)
-        self.assertJSONEqual(response.content, {'error': 'Invalid request.', 'status': 400})
+        self.assertJSONEqual(response.content, {'error': 'session_id cannot be empty'})
 
 
 class GetTripHistoryTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.client.login(email="test@example.com", password="testpassword")
 
 class DeleteAccountTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.client.login(email="test@example.com", password="testpassword")
 
 class LogoutViewTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
+        self.client.login(email="test@example.com", password="testpassword")
 
     def test_logout(self):
         # 登录用户
         self.client.login(email="test@example.com", password="testpassword")
 
         # 发送 POST 请求到登出视图
-        response = self.client.post('/logout/')  # 确保是 POST 请求
+        response = self.client.post(reverse('core:logout'))  # 确保是 POST 请求
 
         # 确保状态码是 200（不会重定向）
         self.assertEqual(response.status_code, 200)
