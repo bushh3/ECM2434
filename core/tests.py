@@ -49,10 +49,6 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class ChangePasswordTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(username='testuser', password='testpassword')
 
     class ChangePasswordTests(TestCase):
         def test_change_password(self):
@@ -84,6 +80,19 @@ class ChangePasswordTests(TestCase):
                 "success": True,
                 "message": "Password updated successfully"
             })  # 确保密码修改成功
+
+        def test_change_password_validation_error(self):
+            # 发送 POST 请求更改密码，使用无效的密码
+            data = {'new_password': 'short'}
+            response = self.client.post(reverse('core:change_password'), data=json.dumps(data),
+                                        content_type='application/json')
+
+            # 检查响应状态码和内容
+            self.assertEqual(response.status_code, 400)
+            self.assertFalse(response.json()['success'])
+            self.assertIn('error', response.json())
+
+
 
 
 
@@ -231,6 +240,53 @@ class ProfileAvatarTestCase(TestCase):
             avatar_path = os.path.join(settings.MEDIA_ROOT, self.user.profile.avatar_url)
             if os.path.exists(avatar_path):
                 os.remove(avatar_path)
+
+    def test_get_user_profile(self):
+        # 发送 GET 请求获取用户信息
+        response = self.client.get(reverse('core:get_user_profile'))
+
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['username'], self.user.username)
+        self.assertEqual(response.json()['email'], self.user.email)
+        self.assertEqual(response.json()['avatar_url'], f"{settings.MEDIA_URL}avatars/fox.jpg")
+
+    def test_get_avatar(self):
+        # 发送 GET 请求获取用户头像
+        response = self.client.get(reverse('core:get_avatar'))
+
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['avatar_url'], f"{settings.MEDIA_URL}avatars/fox.jpg")
+
+    def test_update_user_profile(self):
+        # 发送 PUT 请求更新用户信息
+        data = {
+            'username': 'newusername',
+            'email': 'newemail@example.com',
+            'first_name': 'New',
+            'last_name': 'User'
+        }
+        response = self.client.put(reverse('core:update_user_profile'), data=json.dumps(data),
+                                   content_type='application/json')
+
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['message'], 'Profile updated successfully')
+        # 检查用户信息是否更新
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'newusername')
+        self.assertEqual(self.user.email, 'newemail@example.com')
+        self.assertEqual(self.user.first_name, 'New')
+        self.assertEqual(self.user.last_name, 'User')
+
+
+
+    
+
 
 
 class SaveTripTests(TestCase):
