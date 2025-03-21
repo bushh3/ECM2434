@@ -388,10 +388,48 @@ class GetTripHistoryTests(TestCase):
         self.assertIn('10 Points', content)  # 检查积分
         self.assertIn('Completed', content)  # 检查状态
 
+CustomUser = get_user_model()
+
+
 class DeleteAccountTests(TestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
-        self.client.login(email="test@example.com", password="testpassword")
+        # 创建用户并登录
+        self.user = CustomUser.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword'
+        )
+        self.client = Client()
+        self.client.login(email="test@example.com", password="testpassword")  # 使用 email 登录
+
+    def test_delete_account_unauthenticated(self):
+        # 未登录用户访问
+        self.client.logout()  # 登出用户
+        response = self.client.delete(reverse('core:delete_account'))
+
+        # 检查是否重定向到登录页面
+        self.assertEqual(response.status_code, 302)  # 302 是重定向状态码
+        self.assertIn('/login/', response.url)  # 检查是否重定向到登录页面
+
+    def test_delete_account_authenticated(self):
+        # 登录用户发送 DELETE 请求
+        response = self.client.delete(reverse('core:delete_account'))
+        # 检查响应状态码和内容
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['message'], 'Account deleted successfully')
+
+        # 检查用户是否被删除
+        self.assertFalse(CustomUser.objects.filter(email='test@example.com').exists())
+
+    def test_delete_account_invalid_method(self):
+        # 发送非 DELETE 请求（例如 GET）
+        response = self.client.get(reverse('core:delete_account'))
+        # 检查是否返回 405 错误
+        self.assertEqual(response.status_code, 405)
+        self.assertFalse(response.json()['success'])
+        self.assertEqual(response.json()['error'], 'Invalid request method')
+        
 
 class LogoutViewTests(TestCase):
     def setUp(self):
