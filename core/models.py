@@ -1,6 +1,8 @@
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -14,14 +16,14 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
-
+        
 class Player(models.Model):
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE)
     points = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.email
-    
+        
 @receiver(post_save, sender=CustomUser)
 def create_player_for_new_user(sender, instance, created, **kwargs):
     if created and not hasattr(instance, 'player'):
@@ -57,6 +59,26 @@ class PlayerQuiz(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField()
     timestamp = models.DateTimeField()
+
+class RecyclingBin(models.Model):
+    location_name = models.CharField(max_length=255)
+    qr_code = models.CharField(max_length=255, unique=True)
+    qr_code_image = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.location_name} - {self.qr_code}"
+
+class ScanRecord(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    qr_code = models.CharField(max_length=255)
+    scan_date = models.DateField(default=now)
+
+    class Meta:
+        unique_together = ('user', 'scan_date', 'qr_code')  # users can scan once per station per day
+
+    def __str__(self):
+        return f"{self.user.email} - {self.qr_code} ({self.scan_date})"
 
 class Task(models.Model):
     name = models.CharField(max_length=100)
