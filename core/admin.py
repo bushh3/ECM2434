@@ -1,5 +1,20 @@
-from django.contrib import admin
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
 
+Admin configuration for custom user models, game-related models, quizzes, and utility models.
+
+Modules:
+1. CustomUserAdmin: Admin settings for the CustomUser model.
+2. PlayerAdmin: Admin settings for the Player model, with additional custom methods for displaying user details.
+3. ProfileAdmin: Simple admin settings for the Profile model.
+4. WalkingChallengeAdmin: Admin settings for the WalkingChallenge model, including list filtering and search capabilities.
+5. RecyclingBinAdmin: Admin settings for the RecyclingBin model.
+6. ScanRecordAdmin: Admin settings for the ScanRecord model.
+7. Quiz and Question: Admin registrations for quiz and question models.
+
+"""
+
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Profile, Player
 from .models import Quiz, Question

@@ -1,12 +1,26 @@
-from django.db import models
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
 
+Models for custom user system, player profiles, quiz, recycling game and walking game
+
+Modules:
+- CustomUser: a customized user model with user email.
+- Player: a player model associated with a user, tracking points.
+- Profile: a profile model linked to a user with an avatar.
+- Quiz and Question: models representing quiz and its questions.
+- RecyclingBin: tracks locations and QR codes for recycling bins.
+- ScanRecord: logs user QR code scans with restrictions.
+- WalkingChallenge: represents walking challenges with tracking functionality.
+
+"""
+
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Create your models here.
 
 class CustomUser(AbstractUser):
     """

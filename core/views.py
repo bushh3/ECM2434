@@ -1,3 +1,49 @@
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
+
+Main functionalities:
+
+- User Authentication and Management: 
+User login (login_view)
+User registration (signup)
+Set new password page (set_new_password)
+User logout (logout_view)
+Update user profile (update_user_profile)
+Change user password (change_password)
+Delete user account (delete_account)
+
+- Scoring and Ranking:
+Get user score (get_user_score)
+Get user rank (get_user_rank)
+Save trip data for walking challenge (save_trip)
+Get trip history (get_trip_history)
+Scan QR code to earn points (scan_qr_code)
+Get leaderboard (get_leaderboard)
+
+- Game Functionality:
+Quiz game page (quiz)
+Check answers and update score (check_answer)
+Display quiz results (get_quiz_results)
+Walking game page (walking_game)
+
+- User Profile and Avatar:
+User profile page (profile_view)
+Upload user avatar (upload_avatar)
+Get user profile data (get_user_profile)
+Get user avatar (get_avatar)
+
+- Password Reset Functionality:
+Custom password reset view (CustomPasswordResetView)
+Password reset confirmation (CustomPasswordResetConfirmView)
+
+- Recycling Functionality:
+Recycling bin page (recycling_view)
+
+- Additional Features:
+Fetch quiz questions (fetch_questions)
+Get user information (points and last scan date) (get_user_info)
+"""
+
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy, get_resolver

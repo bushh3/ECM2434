@@ -1,3 +1,8 @@
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
+Configuration class for the 'core' application in the Django project.
+"""
+
 from django.apps import AppConfig
 
 

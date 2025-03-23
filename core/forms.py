@@ -1,3 +1,8 @@
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
+Implements a password reset feature based on email, overriding the default method to fetch users by email instead of username.
+"""
+
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth import get_user_model
 

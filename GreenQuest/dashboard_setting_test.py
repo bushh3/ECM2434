@@ -1,13 +1,18 @@
-# core/views.py
+"""
+Author: Wayuan Xiao, Zhiqiao Luo
+This file contains views, models, URL routing, and test cases for the GreenQuest application.
+"""
+
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.test import TestCase
+from django.urls import reverse
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 def home(request):
     return HttpResponse("Welcome to GreenQuest!")
-
-# core/tests.py
-from django.test import TestCase
-from django.urls import reverse
 
 class HomePageTest(TestCase):
     def test_homepage_status_code(self):
@@ -23,11 +28,6 @@ class HomePageTest(TestCase):
         response = self.client.get(url)
         #indicate message successfully
         self.assertContains(response, "Welcome to GreenQuest!")
-
-# core/tests.py
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.urls import reverse
 
 class LoginTest(TestCase):
 
@@ -50,8 +50,6 @@ class LoginTest(TestCase):
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
 
-
-# core/models.py
 from django.db import models
 
 class Task(models.Model):
@@ -62,8 +60,6 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-
-# core/tests.py
 from django.test import TestCase
 from .models import Task
 
@@ -87,8 +83,6 @@ class TaskModelTest(TestCase):
         # verifies the return value of the __str__ method
         self.assertEqual(str(task), "Test Task")
 
-
-# core/urls.py
 from django.urls import path
 from . import views
 
@@ -97,7 +91,6 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
 ]
 
-# core/tests.py
 from django.test import TestCase
 from django.urls import reverse
 

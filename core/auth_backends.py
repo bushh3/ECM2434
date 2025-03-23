@@ -1,3 +1,9 @@
+"""
+Author: Zhiqiao Luo, Wayuan Xiao
+Custom backend allowing email-based user authentication.
+"""
+
+
 from django.contrib.auth.backends import ModelBackend
 from core.models import CustomUser
 

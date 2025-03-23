@@ -19,10 +19,10 @@ from datetime import date
 
 class LoginTests(TestCase):
     def test_login(self):
-        # 使用 CustomUser 创建用户
+        # use CustomUser to creat user account
         self.user = CustomUser.objects.create_user(username='testuser', password='testpassword')
         response = self.client.post(reverse('core:login'), {
-            'email': 'testuser@example.com',  # 添加 email 字段
+            'email': 'testuser@example.com',  # add email
             'password': 'password123',
         })
         self.assertEqual(response.status_code, 200)
@@ -40,8 +40,8 @@ class LoginTests(TestCase):
             'first_name': 'Test',
             'last_name': 'User',
         })
-        # 确保注册后发生了重定向
-        self.assertEqual(response.status_code, 200)  # Expect a redirect to the login page
+        # ensure a redirect occurs after registration
+        self.assertEqual(response.status_code, 200)  # expect a redirect to the login page
 
         self.assertContains(response, "success")
 
@@ -53,18 +53,18 @@ class LoginTests(TestCase):
 
     class ChangePasswordTests(TestCase):
         def test_change_password(self):
-            # 首先创建一个用户并登录
+            # build a user account first and then log in
             user = User.objects.create_user(
                 email='test@example.com',
                 password='testpassword123'
             )
             self.client.login(email='test@example.com', password='testpassword123')
 
-            # 获取CSRF token
+            # get CSRF token
             response = self.client.get(reverse('core:password_change'))
             csrf_token = response.cookies['csrftoken'].value
 
-            # 模拟POST请求，提交新密码
+            # submit a new password via a simulated POST request
             response = self.client.post(
                 reverse('core:password_change'),
                 data=json.dumps({
@@ -72,23 +72,23 @@ class LoginTests(TestCase):
                     'new_password2': 'newpassword123',
                 }),
                 content_type="application/json",
-                HTTP_X_CSRFTOKEN=csrf_token  # 传递 CSRF Token
+                HTTP_X_CSRFTOKEN=csrf_token  # pass a CSRF Token
             )
 
-            # 验证响应内容
-            self.assertEqual(response.status_code, 200)  # 检查返回的是 200 状态码，而不是重定向
+            # Validate the response content
+            self.assertEqual(response.status_code, 200)  # Check that the returned status code is 200 and not a redirect
             self.assertJSONEqual(response.content, {
                 "success": True,
                 "message": "Password updated successfully"
-            })  # 确保密码修改成功
+            })  # Ensure the password change is successful
 
         def test_change_password_validation_error(self):
-            # 发送 POST 请求更改密码，使用无效的密码
+            # Send a POST request to change the password using an invalid password
             data = {'new_password': 'short'}
             response = self.client.post(reverse('core:change_password'), data=json.dumps(data),
                                         content_type='application/json')
 
-            # 检查响应状态码和内容
+            # Check the response status code and content
             self.assertEqual(response.status_code, 400)
             self.assertFalse(response.json()['success'])
             self.assertIn('error', response.json())
