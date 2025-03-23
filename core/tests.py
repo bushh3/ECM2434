@@ -1,7 +1,7 @@
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import Quiz, Question, Player, PlayerQuiz
+from .models import Quiz, Question
 from django.contrib.auth.models import User
 from core.models import Player
 from django.test import TestCase
@@ -14,7 +14,7 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from .models import Profile, WalkingChallenge
-
+from core.models import RecyclingBin, Player, ScanRecord
 
 class LoginTests(TestCase):
     def test_login(self):
@@ -449,3 +449,24 @@ class LogoutViewTests(TestCase):
         # 确保返回的 JSON 响应是成功的
         self.assertJSONEqual(str(response.content, encoding='utf8'),
                              '{"success": true, "message": "Logged out successfully"}')
+
+
+
+class RecyclingBinTestCase(TestCase):
+    def setUp(self):
+        # 创建一些回收点对象，确保它们在测试时存在
+        RecyclingBin.objects.create(location_name="Amory Building", qr_code="RECYCLE-001")
+        RecyclingBin.objects.create(location_name="Forum", qr_code="RECYCLE-002")
+        RecyclingBin.objects.create(location_name="Harrison", qr_code="RECYCLE-003")
+        RecyclingBin.objects.create(location_name="Sports Park", qr_code="RECYCLE-004")
+
+    def test_recycling_bin_view(self):
+        # 发送GET请求到回收页面
+        response = self.client.get(reverse('core:recycling'))  # 确保在urls.py中定义了这个url
+
+        # 确保返回的响应内容包含回收点名称
+        self.assertContains(response, 'Amory Building')  # 确保 Amory Building 出现在页面
+        self.assertContains(response, 'Forum')  # 确保 Forum 出现在页面
+        self.assertContains(response, 'Harrison')  # 确保 Harrison 出现在页面
+        self.assertContains(response, 'Sports Park')  # 确保 Sports Park 出现在页面
+
