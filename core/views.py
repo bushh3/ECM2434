@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import views as auth_views
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
@@ -43,8 +45,11 @@ def login_view(request):
 
 def signup(request):
     # if no POST, display sign up page
-    if request.method == "POST":
-
+    if request.POST == {}:
+        return render(request, 'core/signup.html')
+    
+    # if POST
+    else:
         # get information
         username = request.POST['username']
         email = request.POST['email']
@@ -72,16 +77,22 @@ def signup(request):
             player = Player(user=user)
             player.save()
 
-            return render(request, 'core/signup.html', {"success": True})
+            # authenticate and log in
+            authenticated_user = authenticate(
+            username=username, 
+            password=password
+            )
+            
+            if authenticated_user:
+                login(request, authenticated_user)
+            return HttpResponseRedirect('/home/')
         
         except IntegrityError:
             return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
         
-    return render(request, 'core/signup.html')
-
 def set_new_password(request):
     return render(request, 'core/set_new_password.html')
-        
+    
 def home(request):
     if (request.user.is_authenticated):
         return render(request, 'core/navpage2.html')
@@ -188,7 +199,7 @@ def get_quiz_results(request):
     
     result_text = f"{correct}|{wrong}|{current_score}|{total_score}"
     
-    return render(request, 'core/result.html', {'result_text': result_text})  
+    return render(request, 'core/result.html', {'result_text': result_text})
 
 @login_required
 def walking_game(request):
@@ -455,3 +466,55 @@ class CustomPasswordResetView(auth_views.PasswordResetView):
     
 class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     success_url = reverse_lazy('core:password_reset_complete') 
+    
+def recycling_view(request):
+    bins = RecyclingBin.objects.all()
+    return render(request, 'core/recycling.html', {'bins': bins})
+
+@login_required
+def get_user_info(request):
+    try:
+        player = Player.objects.get(user=request.user)
+        last_scan = ScanRecord.objects.filter(user=request.user).order_by('-scan_date').first()
+
+        last_scan_date = last_scan.scan_date.strftime('%Y-%m-%d') if last_scan else ''
+
+        response_text = f"status=success&points={player.points}&lastScanDate={last_scan_date}"
+        return HttpResponse(response_text, content_type="text/plain")
+    except Player.DoesNotExist:
+        return HttpResponse("status=error&message=User data not found", content_type="text/plain")
+
+@csrf_exempt
+@login_required
+def scan_qr_code(request):
+    if request.method != "POST":
+        return HttpResponse("status=error&message=Invalid request method", content_type="text/plain")
+
+    user = request.user
+    player, created = Player.objects.get_or_create(user=user)
+    
+    today = now().date()
+    
+    qr_code = request.POST.get("qrCode", "").strip()
+    if not qr_code:
+        return HttpResponse("status=invalid&message=Invalid QR code. Please try again.", content_type="text/plain")
+
+    # check if it is the QR code in the database
+    if not RecyclingBin.objects.filter(qr_code=qr_code).exists():
+        return HttpResponse("status=invalid&message=Invalid QR code. Please try again.", content_type="text/plain")
+    
+    if ScanRecord.objects.filter(user=user, scan_date=today, qr_code=qr_code).exists(): # users can scan once per station per day
+        return HttpResponse("status=already_scanned_today&message=Task completed. Please come back tomorrow.", content_type="text/plain")
+
+    # record the scanning information
+    try:
+        ScanRecord.objects.create(user=user, scan_date=today, qr_code=qr_code)
+    except Exception as e:
+        return HttpResponse(f"status=error&message=Database error: {str(e)}", content_type="text/plain")
+
+    points_earned = 10
+    player.points += points_earned
+    player.save()
+
+    response_text = f"status=success&points={player.points}&pointsEarned={points_earned}&lastScanDate={today}"
+    return HttpResponse(response_text, content_type="text/plain")
