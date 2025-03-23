@@ -23,7 +23,7 @@ items.forEach((item) => {
 //-------------------------------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
     // Retrieve user profile picture and obtain the latest profile picture from the backend -- 获取用户头像，从后端获取最新头像，前后端连接
-    fetch('/api/user/get-avatar', {
+    fetch('/api/user/avatar', {
         method: 'GET',
         headers: {
             "Content-Type": "application/json"
@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            let avatarUrl = data.avatar_url ? data.avatar_url : "/media/avatars/fox.jpg";
-            let avatarImg = document.querySelector(".avatar-frame img");
+            let avatarUrl = data.avatarUrl;
+            let avatarImg = document.querySelector(".avatar-link img");
             if (avatarImg) {
                 avatarImg.src = avatarUrl;
             }
@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(err => {
         console.error("Failed to fetch avatar:", err);
     });
-    
-    fetch('/api/user/get-score', {
+
+    fetch('/leaderboard/api/user_rank/', {
         method: 'GET',
         headers: {
             "Content-Type": "application/json"
@@ -52,16 +52,16 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            let scoreElement = document.getElementById("user-score");
-            if (scoreElement) {
-                scoreElement.textContent = data.score;
+            let rankElement = document.getElementById("user-rank");
+            if (rankElement) {
+                rankElement.textContent = data.rank;
             }
         } else {
-            console.error("Failed to fetch score:", data.error);
+            console.error("Failed to fetch rank:", data.error);
         }
     })
     .catch(err => {
-        console.error("Error fetching score:", err);
+        console.error("Error fetching rank:", err);
     });
 
     // --------------------------------------------------------------------------------------------------
