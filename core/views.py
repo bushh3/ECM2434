@@ -107,12 +107,27 @@ def get_user_score(request):
         return JsonResponse({"success": True, "score": player.points})
     except Player.DoesNotExist:
         return JsonResponse({"success": False, "error": "Player profile not found"}, status=404)
+
+@login_required
+def get_user_rank(request):
+    players = Player.objects.order_by('-points')
+    user_rank = None
+
+    for index, player in enumerate(players):
+        if player.user == request.user:
+            user_rank = index + 1
+            break
+
+    return JsonResponse({"success": True, "rank": user_rank})
         
 def quiz(request):
     return render(request, 'core/quiz.html')
 
 def profile_view(request):
     return render(request, 'core/profile.html')
+    
+def leaderboard_view(request):
+    return render(request, 'core/leaderboard.html')
     
 # View to fetch all questions from the database
 def fetch_questions(request):
@@ -518,3 +533,26 @@ def scan_qr_code(request):
 
     response_text = f"status=success&points={player.points}&pointsEarned={points_earned}&lastScanDate={today}"
     return HttpResponse(response_text, content_type="text/plain")
+
+@login_required
+def get_leaderboard(request):
+    players = (
+        Player.objects
+        .select_related('user__profile')
+        .annotate(username=F('user__username'), avatar=F('user__profile__avatar_url'))
+        .order_by('-points')  # sort by points in descending order
+    )
+
+    leaderboard_data = [
+        {"name": player.username, "score": player.points, "avatar": request.build_absolute_uri(settings.MEDIA_URL + (player.avatar if player.avatar else "avatars/fox.jpg"))}
+        for player in players
+    ]
+
+    # calculate the current user rank
+    user_rank = None
+    for index, player in enumerate(leaderboard_data):
+        if player["name"] == request.user.username:
+            user_rank = index + 1
+            break
+
+    return JsonResponse(leaderboard_data, safe=False)
