@@ -110,15 +110,27 @@ def get_user_score(request):
 
 @login_required
 def get_user_rank(request):
-    players = Player.objects.order_by('-points')
-    user_rank = None
+    players = Player.objects.select_related('user').order_by('-points')
+
+    current_rank = 1
+    current_score = None
+    same_rank_count = 0
 
     for index, player in enumerate(players):
-        if player.user == request.user:
-            user_rank = index + 1
-            break
+        if index == 0:
+            current_score = player.points
+        else:
+            if player.points != current_score:
+                current_rank += same_rank_count
+                current_score = player.points
+                same_rank_count = 0
 
-    return JsonResponse({"success": True, "rank": user_rank})
+        same_rank_count += 1
+
+        if player.user == request.user:
+            return JsonResponse({"success": True, "rank": current_rank})
+
+    return JsonResponse({"success": False, "error": "Player not found"}, status=404)
         
 def quiz(request):
     return render(request, 'core/quiz.html')

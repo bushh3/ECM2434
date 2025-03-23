@@ -23,7 +23,7 @@ items.forEach((item) => {
 //-------------------------------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
     // Retrieve user profile picture and obtain the latest profile picture from the backend -- 获取用户头像，从后端获取最新头像，前后端连接
-    fetch('/api/user/avatar', {
+    fetch('/api/user/get-avatar', {
         method: 'GET',
         headers: {
             "Content-Type": "application/json"
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            let avatarUrl = data.avatarUrl;
+            let avatarUrl = data.avatar_url;
             let avatarImg = document.querySelector(".avatar-link img");
             if (avatarImg) {
                 avatarImg.src = avatarUrl;
@@ -41,6 +41,27 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(err => {
         console.error("Failed to fetch avatar:", err);
+    });
+
+    fetch('/api/user/get-score', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let scoreElement = document.getElementById("user-score");
+            if (scoreElement) {
+                scoreElement.textContent = data.score;
+            }
+        } else {
+            console.error("Failed to fetch score:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching score:", err);
     });
 
     fetch('/leaderboard/api/user_rank/', {
