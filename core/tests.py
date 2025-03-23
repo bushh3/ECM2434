@@ -506,3 +506,35 @@ class ScanQRCodeViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "status=error&message=Invalid request method")
 
+class GetUserInfoTests(TestCase):
+    def setUp(self):
+        # Create the test user if not already created
+        self.user = get_user_model().objects.create_user(
+            username='testuser', email='test@example.com', password='testpassword'
+        )
+        self.client.login(email="test@example.com", password="testpassword")
+
+        # Ensure no Player already exists for the user
+        Player.objects.filter(user=self.user).delete()
+
+        # Create the Player object with points set to 100
+        self.player = Player.objects.create(user=self.user, points=100)
+
+    def test_get_user_info_success(self):
+        # Send GET request to retrieve user info
+        response = self.client.get(reverse('core:get_user_info'))
+
+        # Print the response for debugging
+        print(response.content)
+
+        # Verify the response contains the expected points value
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "points=100")
+
+    def test_get_user_info_user_not_found(self):
+        self.client.logout()
+        response = self.client.get(reverse('core:get_user_info'))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('core:login') + '?next=' + reverse('core:get_user_info'))
+
+
