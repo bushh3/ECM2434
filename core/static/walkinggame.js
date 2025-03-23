@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div style="color:rgb(255, 255, 255); font-size: 28px; margin: 10px 0;">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <p style="margin: 10px 0;">You have completed the green travel challenge and earned 30 points!</p>
+                <p style="margin: 10px 0;">You have successfully reduced 0.5kg of carbon emissions and earned 30 points!</p>
             </div>
         `;
         
