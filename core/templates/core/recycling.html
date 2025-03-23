@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Recycling Master Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'recycling.css' %}">
+    <!-- <link rel="stylesheet" href="recycling.css">  -->
+    <!-- 添加jsQR库用于二维码扫描 -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="game-container">
+            <!-- Main Screen -->
+            <div class="main-screen" id="mainScreen">
+                <div class="header">
+                    <h1>Recycling Master</h1>
+                    <p>Go to the designated recycling station, dispose of recyclable waste, and scan the QR code to earn points.</p>
+                    <div class="points-display">
+                        <i class="fas fa-star"></i>
+                        <span id="pointsDisplay">0 points</span>
+                    </div>
+                </div>
+
+                <div class="locations-grid">
+                    <button class="location-btn" data-location="Amory Building" data-zipcode="EX4 4RJ" data-icon="fa-building">
+                        <i class="fas fa-building"></i>
+                        <span>Amory Building</span>
+                    </button>
+                    <button class="location-btn" data-location="Forum" data-zipcode="EX4 4PZ" data-icon="fa-university">
+                        <i class="fas fa-university"></i>
+                        <span>Forum</span>
+                    </button>
+                    <button class="location-btn" data-location="Harrison" data-zipcode="EX4 4QF" data-icon="fa-schoo">
+                        <i class="fas fa-school"></i>
+                        <span>Harrison</span>
+                    </button>
+                    <button class="location-btn" data-location="Sports Park" data-zipcode="EX4 4QL" data-icon="fa-running">
+                        <i class="fas fa-running"></i>
+                        <span>Sports Park</span>
+                    </button>
+                </div>
+                
+                <div class="footer">
+                    <button class="scan-btn" id="scanBtn">
+                        <i class="fas fa-qrcode"></i>
+                        SCAN
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Scan Screen -->
+            <div class="scan-screen" id="scanScreen">
+                <div class="scan-header">
+                    <button class="back-btn" id="backBtn">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h2>Scan QRcode</h2>
+                    <p>Position QR code within the frame</p>
+                </div>
+                
+                <div class="scanner-container">
+                    <div class="camera-view">
+                        <!-- Camera will be loaded here dynamically -->
+                        <div class="scan-line"></div>
+                        <div class="frame-corners">
+                            <div class="corner top-left"></div>
+                            <div class="corner top-right"></div>
+                            <div class="corner bottom-left"></div>
+                            <div class="corner bottom-right"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="scan-status">
+                        <div class="loading-spinner"></div>
+                        <p>Scanning for QR codes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Result Overlay -->
+            <div class="result-overlay" id="resultOverlay">
+                <div class="result-content" id="resultContent">
+                    <div class="result-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="result-title">Success!</h3>
+                    <p class="result-message">You've earned 10 points for recycling!</p>
+                    <div class="result-actions">
+                        <button class="btn primary-btn" id="resultPrimaryBtn">Return Home</button>
+                        <button class="btn secondary-btn" id="resultSecondaryBtn">Scan Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Location Details Modal -->
+        <div class="modal" id="locationModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">Location Name</h3>
+                    <button class="close-btn" id="closeModalBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="location-detail">
+                        <i class="fas fa-map-pin"></i>
+                        <div class="detail-text">
+                            <strong>Postcode</strong>
+                            <span id="zipcodeValue">12345</span>
+                        </div>
+                    </div>
+                    <div class="location-detail">
+                        <i class="fas fa-clock"></i>
+                        <div class="detail-text">
+                            <strong>Hours</strong>
+                            <span>Open 24/7</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="#" class="navigate-btn" id="navigateBtn" target="_blank">
+                    <i class="fas fa-directions"></i>
+                    Navigate to Location
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- <script src="recycling.js"></script> -->
+    <script src="{% static 'recycling.js' %}"></script>
+</body>
+</html>
