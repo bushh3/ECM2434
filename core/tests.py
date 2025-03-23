@@ -15,6 +15,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from .models import Profile, WalkingChallenge
 from core.models import RecyclingBin, Player, ScanRecord
+from datetime import date
 
 class LoginTests(TestCase):
     def test_login(self):
@@ -469,4 +470,39 @@ class RecyclingBinTestCase(TestCase):
         self.assertContains(response, 'Forum')  # 确保 Forum 出现在页面
         self.assertContains(response, 'Harrison')  # 确保 Harrison 出现在页面
         self.assertContains(response, 'Sports Park')  # 确保 Sports Park 出现在页面
+
+class ScanQRCodeViewTests(TestCase):
+    def setUp(self):
+        # 创建测试用户并登录
+        self.user = get_user_model().objects.create_user(
+            username='testuser', email='test@example.com', password='testpassword'
+        )
+        self.client.login(email="test@example.com", password="testpassword")
+
+        # 创建测试的回收点
+        RecyclingBin.objects.create(qr_code="QR123", location_name="Bin 1")
+
+    def test_scan_qr_code_success(self):
+        # 模拟扫描二维码，发送POST请求
+        response = self.client.post(reverse('core:scan_qr_code'), {'qrCode': 'QR123'})
+
+        # 检查返回的状态码和响应内容
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "status=success")
+
+    def test_scan_qr_code_invalid_qr(self):
+        response = self.client.post(reverse('core:scan_qr_code'), {'qrCode': 'InvalidQR'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "status=invalid&message=Invalid QR code. Please try again.")
+
+    def test_scan_qr_code_already_scanned(self):
+        ScanRecord.objects.create(user=self.user, scan_date=date.today(), qr_code="QR123")
+        response = self.client.post(reverse('core:scan_qr_code'), {'qrCode': 'QR123'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "status=already_scanned_today")
+
+    def test_scan_qr_code_invalid_method(self):
+        response = self.client.get(reverse('core:scan_qr_code'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "status=error&message=Invalid request method")
 
