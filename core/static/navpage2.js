@@ -19,6 +19,51 @@ items.forEach((item) => {
     item.addEventListener('click', setActive);
 });
 
+function refreshUserScore() {
+    fetch('/api/user/get-score', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let scoreElement = document.getElementById("user-score");
+            if (scoreElement) {
+                scoreElement.textContent = data.score;
+            }
+        } else {
+            console.error("Failed to fetch score:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching score:", err);
+    });
+}
+
+function refreshUserRank() {
+    fetch('/leaderboard/api/user_rank/', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let rankElement = document.getElementById("user-rank");
+            if (rankElement) {
+                rankElement.textContent = data.rank;
+            }
+        } else {
+            console.error("Failed to fetch rank:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching rank:", err);
+    });
+}
 
 //-------------------------------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {
@@ -43,47 +88,8 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Failed to fetch avatar:", err);
     });
 
-    fetch('/api/user/get-score', {
-        method: 'GET',
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            let scoreElement = document.getElementById("user-score");
-            if (scoreElement) {
-                scoreElement.textContent = data.score;
-            }
-        } else {
-            console.error("Failed to fetch score:", data.error);
-        }
-    })
-    .catch(err => {
-        console.error("Error fetching score:", err);
-    });
-
-    fetch('/leaderboard/api/user_rank/', {
-        method: 'GET',
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            let rankElement = document.getElementById("user-rank");
-            if (rankElement) {
-                rankElement.textContent = data.rank;
-            }
-        } else {
-            console.error("Failed to fetch rank:", data.error);
-        }
-    })
-    .catch(err => {
-        console.error("Error fetching rank:", err);
-    });
+    refreshUserScore();
+    refreshUserRank();
 
     // --------------------------------------------------------------------------------------------------
 
@@ -115,4 +121,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     };
+});
+
+window.addEventListener("focus", () => {
+    refreshUserScore();
+    refreshUserRank();
 });
