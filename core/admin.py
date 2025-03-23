@@ -1,9 +1,10 @@
 from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Player
+from .models import CustomUser, Profile, Player
 from .models import Quiz, Question
 from .models import RecyclingBin, ScanRecord
+from .models import WalkingChallenge
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -13,9 +14,32 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'points')
-    search_fields = ('user__email',)
+    list_display = ('get_username', 'get_email', 'points', 'get_avatar')
+    search_fields = ('user__email', 'user__username')
     ordering = ('-points',)
+
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_email(self, obj):
+        return obj.user.email
+
+    def get_avatar(self, obj):
+        return obj.user.profile.avatar_url
+
+    get_username.short_description = "Username"
+    get_email.short_description = "Email"
+    get_avatar.short_description = "Avatar URL"
+    
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'avatar_url']
+
+@admin.register(WalkingChallenge)
+class WalkingChallengeAdmin(admin.ModelAdmin):
+    list_display = ('player', 'start_time', 'end_time', 'distance', 'is_completed', 'points_earned')    
+    list_filter = ('start_time', 'is_completed')
+    search_fields = ('player__user__email',)
 
 @admin.register(RecyclingBin)
 class RecyclingBinAdmin(admin.ModelAdmin):
