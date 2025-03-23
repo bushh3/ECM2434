@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .forms import EmailBasedPasswordResetForm
 from .views import CustomPasswordResetView, CustomPasswordResetConfirmView
+from .views import get_user_info, scan_qr_code
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from . import views
 
@@ -37,6 +38,9 @@ urlpatterns = [
     path('walkinggame/', views.walking_game, name="walkinggame"),
     path('walkinggame/save/', views.save_trip, name="save_trip"),
     path('walkinggame/history/', views.get_trip_history, name="get_trip_history"),
+    path('recycling/', views.recycling_view, name='recycling'),
+    path('recycling/user/info/', views.get_user_info, name='get_user_info'),
+    path('recycling/scan/', views.scan_qr_code, name='scan_qr_code'),
 ]
 
 if settings.DEBUG:
