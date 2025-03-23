@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Profile, Player
 from .models import Quiz, Question
+from .models import RecyclingBin, ScanRecord
+from .models import WalkingChallenge
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -28,10 +30,26 @@ class PlayerAdmin(admin.ModelAdmin):
     get_username.short_description = "Username"
     get_email.short_description = "Email"
     get_avatar.short_description = "Avatar URL"
-
+    
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'avatar_url']
+
+@admin.register(WalkingChallenge)
+class WalkingChallengeAdmin(admin.ModelAdmin):
+    list_display = ('player', 'start_time', 'end_time', 'distance', 'is_completed', 'points_earned')    
+    list_filter = ('start_time', 'is_completed')
+    search_fields = ('player__user__email',)
+
+@admin.register(RecyclingBin)
+class RecyclingBinAdmin(admin.ModelAdmin):
+    list_display = ('location_name', 'qr_code', 'created_at')
+
+@admin.register(ScanRecord)
+class ScanRecordAdmin(admin.ModelAdmin):
+    list_display = ('user', 'qr_code', 'scan_date')
+    list_filter = ('user', 'scan_date')
+    ordering = ('user', 'scan_date')
 
 admin.site.register(Quiz)
 admin.site.register(Question)
