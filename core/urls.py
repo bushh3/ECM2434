@@ -41,6 +41,9 @@ urlpatterns = [
     path('recycling/', views.recycling_view, name='recycling'),
     path('recycling/user/info/', views.get_user_info, name='get_user_info'),
     path('recycling/scan/', views.scan_qr_code, name='scan_qr_code'),
+    path('leaderboard/', views.leaderboard_view, name="leaderboard"),
+    path('leaderboard/api/user_rank/', views.get_user_rank, name="user_rank"),
+    path('leaderboard/api/rankings/', views.get_leaderboard, name='leaderboard_api'),
 ]
 
 if settings.DEBUG:
