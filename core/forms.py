@@ -3,6 +3,9 @@ from django.contrib.auth import get_user_model
 
 class EmailBasedPasswordResetForm(PasswordResetForm):
     def get_users(self, email):
+        """
+        Override the get_users() method so that Django looks up the user by email instead of username
+        """
         
         active_users = get_user_model()._default_manager.filter(email__iexact=email, is_active=True)
         return (user for user in active_users if user.has_usable_password())

@@ -101,6 +101,11 @@ def home(request):
         
 @login_required
 def get_user_score(request):
+    """
+    Gets the points of the currently logged in user
+    Queries the associated Player model
+    Returns the user's current points if it exists, otherwise an error is returned
+    """
     user = request.user
     try:
         player = Player.objects.get(user=user)
@@ -110,6 +115,12 @@ def get_user_score(request):
 
 @login_required
 def get_user_rank(request):
+    """
+    Retrieve the current user's ranking based on points
+    All player are ordered in descending order of points
+    Users with the same points share the same rank
+    Returns the user's current rank if it exists, otherwise an error is returned
+    """
     players = Player.objects.select_related('user').order_by('-points')
 
     current_rank = 1
@@ -143,6 +154,10 @@ def leaderboard_view(request):
     
 # View to fetch all questions from the database
 def fetch_questions(request):
+    """
+    Randomly selected from the database for 5 questions and save the session
+    Render the question page and pass the question content to the front end in JSON format
+    """
     questions = list(Question.objects.all()) 
     selected_questions = random.sample(questions, min(5, len(questions)))
 
@@ -171,6 +186,11 @@ def fetch_questions(request):
 # View to check the user's answer for a specific question
 @login_required
 def check_answer(request):
+    """
+    Compare the user submitted answers to the correct answers for each question
+    Accumulate points and update user points into Player model
+    Save the results to session and then jump to the results page
+    """
     if request.method == "POST":
         session_questions = request.session.get('current_questions', {})
         total_questions = len(session_questions)
@@ -211,6 +231,10 @@ def check_answer(request):
 
 @login_required
 def get_quiz_results(request):
+    """
+    Get the correct number of questions, points, total points, etc., from the session
+    Return the rendered results page
+    """
     player = request.user.player
     quiz_result = request.session.get('quiz_result', {
         'correct': 0,
@@ -335,7 +359,13 @@ def get_trip_history(request):
 
 
 @login_required
-def upload_avatar(request): # 上传头像 Upload the avatar
+def upload_avatar(request): # Upload the avatar
+    """
+    Only support the POST request
+    Verify the file type and delete the old avatar (if it is not the default avatar)
+    Save the new avatar and update the user profile
+    Return the upload result and the avatar address
+    """
     if request.method == "POST":
         if 'avatar' not in request.FILES:
             return JsonResponse({"success": False, "error": "No file uploaded"}, status=400, content_type="application/json")
@@ -362,7 +392,11 @@ def upload_avatar(request): # 上传头像 Upload the avatar
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def get_user_profile(request): # Profile页面获取用户信息，包括打招呼的地方 Profile page obtain user information
+def get_user_profile(request): # Profile page obtain user information
+    """
+    Return username, email, first name, last name, avatar address to the front end
+    Used for front-end Profile page initialization
+    """
     if request.method == "GET":
         user = request.user
 
@@ -379,7 +413,11 @@ def get_user_profile(request): # Profile页面获取用户信息，包括打招�
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def get_avatar(request): # 获取用户头像 Obtain the user avatar
+def get_avatar(request): # Obtain the user avatar
+    """
+    Obtain the user avatar for display
+    If the user does not have a customized avatar, the default avatar address is returned
+    """
     if request.method == "GET":
         profile = get_object_or_404(Profile, user=request.user)
         if profile.avatar_url:
@@ -391,7 +429,12 @@ def get_avatar(request): # 获取用户头像 Obtain the user avatar
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def delete_account(request): # 注销账号 Cancel the account
+def delete_account(request): # Cancel the account
+    """
+    Cancel the current account
+    Only support the DELECT request
+    Delete the user and log out, and clear the session
+    """
     if request.method == "DELETE":
 
         user = request.user
@@ -402,7 +445,13 @@ def delete_account(request): # 注销账号 Cancel the account
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def update_user_profile(request): # 修改个人信息Update the user information
+def update_user_profile(request): # Update the user information
+    """
+    Update the user's personal information
+    Support the PUT request
+    Users can modify information: username, email, first name, last name
+    If the user changes the email, the user must log out automatically and ask to log in again using the new email
+    """
     if request.method == "PUT":
 
         try:
@@ -411,7 +460,7 @@ def update_user_profile(request): # 修改个人信息Update the user informatio
             old_email = user.email
             new_email = data.get('email', user.email)
 
-            if CustomUser.objects.filter(email=new_email).exclude(id=user.id).exists(): #检查邮箱名是否重复 Check whethe the email are duplicated
+            if CustomUser.objects.filter(email=new_email).exclude(id=user.id).exists(): # Check whethe the email are duplicated
                 return JsonResponse({"success": False, "error": "This email is already in use"}, status=400, content_type="application/json")
 
             user.username = data.get('username', user.username)
@@ -422,7 +471,7 @@ def update_user_profile(request): # 修改个人信息Update the user informatio
             user.save()
 
             email_changed = old_email != user.email
-            if email_changed: #修改邮箱后要重新登录 User need to log in again after changing the email
+            if email_changed: # User need to log in again after changing the email
                 logout(request)
                 return JsonResponse({"success": True, "message": "Profile updated successfully", "email_changed": True}, content_type="application/json")
             return JsonResponse({"success": True, "message": "Profile updated successfully"}, content_type="application/json")
@@ -432,7 +481,12 @@ def update_user_profile(request): # 修改个人信息Update the user informatio
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def change_password(request): # 已登录用户的重设密码 Reset the password of the logged-in user
+def change_password(request): # Reset the password of the logged-in user
+    """
+    The logged-in user's change password
+    The POST request receives the new password, verifies its validity and saves it
+    Return whether the update succeeded or an error message
+    """
     if request.method == "POST":
 
         try:
@@ -454,7 +508,11 @@ def change_password(request): # 已登录用户的重设密码 Reset the passwor
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
 
 @login_required
-def logout_view(request): # 登出 Logout
+def logout_view(request): # Logout
+    """
+    When the user logs out, the session is cleared, the cookie is deleted, and the logout success message is returned
+    Only support the POST request
+    """
     if request.method == "POST":
 
         logout(request)
@@ -468,6 +526,11 @@ def logout_view(request): # 登出 Logout
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json") 
     
 class CustomPasswordResetView(auth_views.PasswordResetView):
+    """
+    Custom the password reset view
+    Used to generate password reset links and send emails
+    Override the form_valid method to inject a custom URL
+    """
     def form_valid(self, form):
         users = list(form.get_users(form.cleaned_data["email"]))
         if not users:
@@ -492,14 +555,26 @@ class CustomPasswordResetView(auth_views.PasswordResetView):
         return super().form_valid(form)
     
 class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    """
+    The user can click the reset link to set a new password
+    Redirect to the custom password_reset_complete page if successful
+    """
     success_url = reverse_lazy('core:password_reset_complete') 
     
 def recycling_view(request):
+    """
+    Display all recycling stations that support QR code scanning
+    Get all recycling stations and renders them to the front page
+    """
     bins = RecyclingBin.objects.all()
     return render(request, 'core/recycling.html', {'bins': bins})
 
 @login_required
 def get_user_info(request):
+    """
+    Get user information, return the current user points and the date of the last code scan
+    If the user data does not exist, an error message is displayed
+    """
     try:
         player = Player.objects.get(user=request.user)
         last_scan = ScanRecord.objects.filter(user=request.user).order_by('-scan_date').first()
@@ -514,6 +589,12 @@ def get_user_info(request):
 @csrf_exempt
 @login_required
 def scan_qr_code(request):
+    """
+    Code scanning in POST request mode
+    Verify whether the QR code exists and whether the user has scanned the code on that station that day
+    After the scanning is successful, record the scanning record, accumulate the points, and return the result
+    The return format is text/plain, and contain the integral and status information
+    """
     if request.method != "POST":
         return HttpResponse("status=error&message=Invalid request method", content_type="text/plain")
 

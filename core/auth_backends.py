@@ -3,7 +3,7 @@ from core.models import CustomUser
 
 class EmailAuthBackend(ModelBackend):
     """
-    自定义认证后端，允许使用 email 登录
+    Customize the authentication backend, allowing email login
     """
     def authenticate(self, request, email=None, password=None, **kwargs):
         try:
