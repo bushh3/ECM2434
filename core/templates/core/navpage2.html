@@ -25,7 +25,7 @@
             <!--click avatar to enter the profile page-->
             <a href="{% url 'core:profile' %}" class="avatar-link">
                 <div class="avatar-frame">
-                    {% if user.profile.avatar_url %}
+                    {% if user.profile.avatar_url and 'avatars/' in user.profile.avatar_url %}
                         <img src="/media/{{ user.profile.avatar_url }}" alt="Avatar">
                     {% else %}
                         <img src="{% static 'pictures/fox.jpg' %}" alt="Default Avatar">

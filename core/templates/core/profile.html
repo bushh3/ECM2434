@@ -18,7 +18,7 @@
   
     <div class="avatar-bg" style="background: linear-gradient(to bottom, rgba(0,0,0,0) 80%, rgb(255,255,255) 100%), url({% static 'pictures/leaves.jpg' %}) no-repeat center center; background-size: cover;">
         <div class="selected-avatar" onclick="openModal()">
-            {% if user.profile.avatar_url %}
+            {% if user.profile.avatar_url and 'avatars/' in user.profile.avatar_url %}
                 <img id="current-avatar" src="/media/{{ user.profile.avatar_url }}" alt="current avatar">
             {% else %}
                 <img id="current-avatar" src="{% static 'pictures/fox.jpg' %}" alt="Default Avatar">
@@ -35,7 +35,7 @@
                 <i class="fa fa-times"></i>
             </button>
             <div class="avatar-modal-avatar">
-                {% if user.profile.avatar_url %}
+                {% if user.profile.avatar_url and 'avatars/' in user.profile.avatar_url %}
                     <img id="modal-avatar" src="/media/{{ user.profile.avatar_url }}" alt="Avatar">
                 {% else %}
                     <img id="modal-avatar" src="{% static 'pictures/fox.jpg' %}" alt="Default Avatar">
