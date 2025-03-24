@@ -342,7 +342,7 @@ def save_trip(request):
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
         distance = request.POST.get('distance')
-        duration = request.POST.get('duration')
+        duration = float(request.POST.get('duration')) / 1000
         is_completed = request.POST.get('is_completed') == 'true'
         points_earned = 30 if is_completed else 0
 
