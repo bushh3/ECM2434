@@ -18,7 +18,11 @@
   
     <div class="avatar-bg" style="background: linear-gradient(to bottom, rgba(0,0,0,0) 80%, rgb(255,255,255) 100%), url({% static 'pictures/leaves.jpg' %}) no-repeat center center; background-size: cover;">
         <div class="selected-avatar" onclick="openModal()">
-            <img id="current-avatar" src="/media/avatars/fox.jpg" alt="current avatar" />
+            {% if user.profile.avatar_url %}
+                <img id="current-avatar" src="/media/{{ user.profile.avatar_url }}" alt="current avatar">
+            {% else %}
+                <img id="current-avatar" src="{% static 'pictures/fox.jpg' %}" alt="Default Avatar">
+            {% endif %}
         </div>
         <p class="greeting">Hi, <span id="display-username"></span>!</p>
         <input type="file" id="avatar-upload" accept="image/*" onchange="uploadAvatar(event)" style="display:none"/>
@@ -31,7 +35,11 @@
                 <i class="fa fa-times"></i>
             </button>
             <div class="avatar-modal-avatar">
-                <img id="modal-avatar" src="/media/avatars/fox.jpg" alt="Avatar">
+                {% if user.profile.avatar_url %}
+                    <img id="modal-avatar" src="/media/{{ user.profile.avatar_url }}" alt="Avatar">
+                {% else %}
+                    <img id="modal-avatar" src="{% static 'pictures/fox.jpg' %}" alt="Default Avatar">
+                {% endif %}
             </div>
             <div class="avatar-modal-actions">
                 <input type="file" id="avatar-upload" accept="image/*" onchange="uploadAvatar(event)" style="display:none"/>
