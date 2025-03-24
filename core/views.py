@@ -457,7 +457,7 @@ def upload_avatar(request): # Upload the avatar
 
         profile = get_object_or_404(Profile, user=request.user)
 
-        if profile.avatar_url and profile.avatar_url != "avatars/fox.jpg":
+        if profile.avatar_url and 'avatars/' in profile.avatar_url:
             old_avatar_path = os.path.join(settings.MEDIA_ROOT, profile.avatar_url)
             if os.path.exists(old_avatar_path):
                 os.remove(old_avatar_path)
@@ -481,7 +481,10 @@ def get_user_profile(request): # Profile page obtain user information
         user = request.user
 
         profile = get_object_or_404(Profile, user=user)
-        avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}" if profile.avatar_url else f"{settings.MEDIA_URL}avatars/fox.jpg"
+        if profile.avatar_url and 'avatars/' in profile.avatar_url:
+            avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}"
+        else:
+            avatar_url = static('pictures/fox.jpg')
         return JsonResponse({
             "success": True,
             "username": user.username,
@@ -500,7 +503,7 @@ def get_avatar(request): # Obtain the user avatar
     """
     if request.method == "GET":
         profile = get_object_or_404(Profile, user=request.user)
-        if profile.avatar_url:
+        if profile.avatar_url and 'avatars/' in profile.avatar_url:
             avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}"
         else:
             avatar_url = static('pictures/fox.jpg')
@@ -720,10 +723,18 @@ def get_leaderboard(request):
         .order_by('-points')  # sort by points in descending order
     )
 
-    leaderboard_data = [
-        {"name": player.username, "score": player.points, "avatar": request.build_absolute_uri(settings.MEDIA_URL + (player.avatar if player.avatar else "avatars/fox.jpg"))}
-        for player in players
-    ]
+    leaderboard_data = []
+    for player in players:
+        if player.avatar and 'avatars/' in player.avatar:
+            avatar_url = request.build_absolute_uri(settings.MEDIA_URL + player.avatar)
+        else:
+            avatar_url = request.build_absolute_uri(static('pictures/fox.jpg'))
+
+        leaderboard_data.append({
+            "name": player.username,
+            "score": player.points,
+            "avatar": avatar_url
+        }) 
 
     # calculate the current user rank
     user_rank = None
