@@ -69,6 +69,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.templatetags.static import static
 import json
 import random
 import os
@@ -502,7 +503,7 @@ def get_avatar(request): # Obtain the user avatar
         if profile.avatar_url:
             avatar_url = f"{settings.MEDIA_URL}{profile.avatar_url}"
         else:
-            avatar_url = f"{settings.MEDIA_URL}avatars/fox.jpg"
+            avatar_url = static('pictures/fox.jpg')
         return JsonResponse({"success": True, "avatar_url": avatar_url}, content_type="application/json")
     
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=405, content_type="application/json")
