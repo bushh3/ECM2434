@@ -73,6 +73,10 @@ import json
 import random
 import os
 
+
+"""
+Handles user login using email and password, redirecting to the homepage on success.
+"""
 def login_view(request):
     form = AuthenticationForm(request, data=request.POST)
     if request.method != "POST":
@@ -88,7 +92,11 @@ def login_view(request):
             return render(request,
                          "core/login.html",
                          {"form": form})
+        
 
+"""
+manages user registration, creates a new account and logs the user in
+"""
 def signup(request):
     # if no POST, display sign up page
     if request.POST == {}:
@@ -135,7 +143,11 @@ def signup(request):
         
         except IntegrityError:
             return render(request, 'core/signup.html', {"error_message": "An error occurred, please try again"})
-        
+
+
+"""
+renders the page for users to set a new password
+"""        
 def set_new_password(request):
     return render(request, 'core/set_new_password.html')
     
@@ -188,13 +200,25 @@ def get_user_rank(request):
             return JsonResponse({"success": True, "rank": current_rank})
 
     return JsonResponse({"success": False, "error": "Player not found"}, status=404)
-        
+
+
+"""
+renders the quiz page for users to participate in quizzes
+"""
 def quiz(request):
     return render(request, 'core/quiz.html')
 
+
+"""
+renders the profile page displaying user details
+"""
 def profile_view(request):
     return render(request, 'core/profile.html')
     
+
+"""
+renders the leaderboard page showcasing rankings and scores
+"""   
 def leaderboard_view(request):
     return render(request, 'core/leaderboard.html')
     
@@ -300,10 +324,16 @@ def get_quiz_results(request):
 
 @login_required
 def walking_game(request):
+    """
+    Displays the walking game page, allowing users to start challenges
+    """
     return render(request, 'core/walkinggame.html')
 
 @login_required
 def save_trip(request):
+    """
+    Saves or updates walking trip data, calculates points, and updates the player's score
+    """
     if request.method == 'POST':
         session_id = request.POST.get('session_id')
         if not session_id:
@@ -352,6 +382,9 @@ def save_trip(request):
 
 @login_required
 def get_trip_history(request):
+    """
+    Retrieves and displays the user's walking challenge history in HTML format
+    """
     if not hasattr(request.user, 'player'):
         Player.objects.create(user=request.user, points=0)
     player = request.user.player
@@ -675,6 +708,10 @@ def scan_qr_code(request):
 
 @login_required
 def get_leaderboard(request):
+    """
+    Fetches the leaderboard data sorted by player points in descending order, 
+    includes user avatars, and determines the current user's rank
+    """
     players = (
         Player.objects
         .select_related('user__profile')
