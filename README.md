@@ -128,14 +128,18 @@ GreenQuest/
 │── manage.py 
 │── README.md    
 
+## Live Demo
+You can access the developed vision of this project at this following link: https://greenquest-ge4y.onrender.com
+
 ## Project operation
 git clone https://github.com/amcaye/ECM2434.git  
 cd ECM2434  
 python -m venv venv  
 venv\Scripts\activate  
-pip install django  
-pip install djangorestframework django-crispy-forms  
-pip install Pillow  
+pip install -r requirements.txt   
 python manage.py migrate  
 python manage.py runserver  
 Then use the browser open http://127.0.0.1:8000/login/  
+
+## Running tests
+python manage.py test  
