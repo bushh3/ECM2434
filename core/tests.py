@@ -7,6 +7,8 @@ from core.models import Player
 from django.test import TestCase
 from core.models import CustomUser  # 引入 CustomUser 模型
 from django.utils.http import urlencode
+from django.templatetags.static import static
+from django.utils.timezone import now
 import json
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -251,7 +253,8 @@ class ProfileAvatarTestCase(TestCase):
         self.assertTrue(response.json()['success'])
         self.assertEqual(response.json()['username'], self.user.username)
         self.assertEqual(response.json()['email'], self.user.email)
-        self.assertEqual(response.json()['avatar_url'], f"{settings.MEDIA_URL}avatars/fox.jpg")
+        expected_url = static('pictures/fox.jpg')
+        self.assertEqual(response.json()['avatar_url'], expected_url)
 
     def test_get_avatar(self):
         # 发送 GET 请求获取用户头像
@@ -260,7 +263,8 @@ class ProfileAvatarTestCase(TestCase):
         # 检查响应状态码和内容
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['success'])
-        self.assertEqual(response.json()['avatar_url'], f"{settings.MEDIA_URL}avatars/fox.jpg")
+        expected_url = static('pictures/fox.jpg')
+        self.assertEqual(response.json()['avatar_url'], expected_url)
 
     def test_update_user_profile(self):
         # 发送 PUT 请求更新用户信息
@@ -496,7 +500,8 @@ class ScanQRCodeViewTests(TestCase):
         self.assertContains(response, "status=invalid&message=Invalid QR code. Please try again.")
 
     def test_scan_qr_code_already_scanned(self):
-        ScanRecord.objects.create(user=self.user, scan_date=date.today(), qr_code="QR123")
+        today = now().date()
+        ScanRecord.objects.create(user=self.user, scan_date=today, qr_code="QR123")
         response = self.client.post(reverse('core:scan_qr_code'), {'qrCode': 'QR123'})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "status=already_scanned_today")
