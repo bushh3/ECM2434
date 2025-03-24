@@ -57,7 +57,7 @@ class Profile(models.Model):
     User personal information model, additional user avatar extended information
     """
     user = models.OneToOneField('core.CustomUser', on_delete=models.CASCADE, related_name="profile")
-    avatar_url = models.CharField(max_length=255, blank=True, null=True, default="pictures/fox.jpg")
+    avatar_url = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"Profile of {self.user.email}"
@@ -68,7 +68,7 @@ def create_related_objects(sender, instance, created, **kwargs):
     Signal receiver: the associated Profile and Player are automatically generated when the user is created
     """
     if created:
-        Profile.objects.get_or_create(user=instance, defaults={"avatar_url": "pictures/fox.jpg"})
+        Profile.objects.get_or_create(user=instance)
         Player.objects.get_or_create(user=instance)
         
 class Quiz(models.Model):
