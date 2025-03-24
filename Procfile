@@ -1,0 +1,1 @@
+web: gunicorn GreenQuest.wsgi
