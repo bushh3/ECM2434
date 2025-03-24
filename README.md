@@ -123,9 +123,9 @@ GreenQuest/
 │── media/  
 │   │── avatars/  
 │   │── qr_codes/  
+│   │── quiz_questions/  
 │── db.sqlite3  
-│── manage.py  
-│── Quiz Q&A bank.docx  
+│── manage.py 
 │── README.md    
 
 ## Project operation
