@@ -24,9 +24,7 @@
             </div>
             <!--click avatar to enter the profile page-->
             <a href="{% url 'core:profile' %}" class="avatar-link">
-                <div class="avatar-frame">
-                    <img src="{% static 'pictures/fox.jpg' %}" alt="Avatar">
-                </div>
+                <img src="{% static 'pictures/fox.jpg' %}" alt="Avatar">
             </a>
             <!-- leaderboard and score -->
             <a href="{% url 'core:leaderboard' %}" class="user-info-link">
