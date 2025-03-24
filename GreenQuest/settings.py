@@ -22,7 +22,7 @@ SECRET_KEY = 'django-insecure-w6b11v5ych#3)9t+%w)6=g@^8g57^wet-ggctyeysxo=9q-6_1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['greenquest-ge4y.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'greenquest-ge4y.onrender.com']
 
 
 # Application definition
