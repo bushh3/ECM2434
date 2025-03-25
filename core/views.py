@@ -634,7 +634,7 @@ class CustomPasswordResetView(auth_views.PasswordResetView):
         form.save(
             request=self.request,
             use_https=self.request.is_secure(),
-            email_template_name='registration/password_reset_email.html',
+            html_email_template_name='registration/password_reset_email.html',
             subject_template_name='registration/password_reset_subject.txt',
             token_generator=default_token_generator,
             extra_email_context={'password_reset_confirm_url': reset_url},
