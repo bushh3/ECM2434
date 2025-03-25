@@ -1,0 +1,215 @@
+:root {
+    --primary-color: #4CAF50;      /* Green */
+    --secondary-color: #8BC34A;    /* Light Green */
+    --accent-color: #2E7D32;       /* Dark Green */
+    --background-color: #F1F8E9;   /* Very Light Green */
+    --text-color: #33691E;         /* Dark Green Text */
+    --error-color: #F44336;        /* Red for errors */
+    --success-color: #388E3C;      /* Green for success */
+    --shadow-color: rgba(76, 175, 80, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.7), rgba(139, 195, 74, 0.3)), 
+                     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%234CAF50" fill-opacity="0.1" d="M30,10 Q50,0 70,10 T100,30 T90,70 T70,90 T30,90 T10,70 T0,30 T30,10 Z" /></svg>');
+    background-size: cover, 400px;
+    background-position: center, center;
+}
+
+.container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Leaf decoration in the corner */
+.container::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%234CAF50" fill-opacity="0.2" d="M0,100 C30,90 70,30 100,0 C70,0 30,10 0,100 Z" /></svg>');
+    background-size: cover;
+    transform: rotate(180deg);
+    opacity: 0.5;
+}
+
+h2 {
+    color: var(--accent-color);
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 500;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--secondary-color);
+    border-radius: 2px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style for Django form paragraphs */
+form p {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Style for Django form labels */
+form p label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* Style for Django form inputs */
+form p input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+form p input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Style for Django form help text */
+form p .helptext {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Style for error messages */
+form ul.errorlist {
+    list-style: none;
+    color: var(--error-color);
+    font-size: 13px;
+    margin-top: 5px;
+    padding-left: 0;
+}
+
+/* Submit button */
+button[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 24px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--accent-color);
+}
+
+button[type="submit"]:active {
+    transform: translateY(2px);
+}
+
+/* Button ripple effect */
+button[type="submit"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+button[type="submit"]:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 30px 20px;
+        width: 95%;
+    }
+}
+
+/* Success message styling */
+.success-message {
+    background-color: rgba(56, 142, 60, 0.1);
+    border-left: 4px solid var(--success-color);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    color: var(--success-color);
+}
+
+/* Add leaf icons to form elements */
+form p label::before {
+    content: "🍃 ";
+    font-size: 14px;
+}
