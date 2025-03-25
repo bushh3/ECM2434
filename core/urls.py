@@ -26,6 +26,7 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('signup/', views.signup, name="signup"),
     path('api/user/get-score/', views.get_user_score, name="get_user_score"),
+    path('navpage2/', views.navpage2, name="navpage2"),
     path('quiz/', views.quiz, name="quiz"),
     path('questions/', views.fetch_questions, name="fetch_questions"),  # get question
     path('check-answer/', views.check_answer, name="check_answer"),  # check answer

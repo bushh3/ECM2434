@@ -204,6 +204,10 @@ def get_user_rank(request):
 
 
 """
+"""
+def navpage2(request):
+    return render(request, 'core/navpage2.html')
+"""
 renders the quiz page for users to participate in quizzes
 """
 def quiz(request):

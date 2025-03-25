@@ -14,7 +14,10 @@ function getCookie(name) {
 }
 
 function goBack() {
-    window.history.back();
+    // 将用户重定向到主页（首页）
+    const navUrl = "/";  // 这对应于你的 path('', views.home, name="home")
+    console.log("返回到主页:", navUrl);  // 调试信息
+    window.location.href = navUrl;
 }
 
 
@@ -48,6 +51,9 @@ function uploadAvatar(event) {
             document.getElementById("modal-avatar").src = newAvatarUrl;
             closeModal();
             showPopup("Avatar updated successfully.");
+            setTimeout(() => {
+                location.reload(); 
+            }, 1500);
         } else {
             closeModal();
             showPopup("Avatar update failed, please try again.");
